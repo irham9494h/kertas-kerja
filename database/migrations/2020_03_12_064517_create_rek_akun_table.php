@@ -17,6 +17,7 @@ class CreateRekAkunTable extends Migration
             $table->id();
             $table->integer('kode');
             $table->string('nama_akun');
+            $table->string('alias');
             $table->bigInteger('created_by')->nullable();
             $table->timestamps();
         });

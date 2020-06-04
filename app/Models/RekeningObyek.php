@@ -10,8 +10,8 @@ class RekeningObyek extends Model
 
     protected $guarded = [];
 
-    public function kelompok()
+    public function jenis()
     {
-        return $this->belongsTo(RekeningKelompok::class);
+        return $this->belongsTo(RekeningJenis::class);
     }
 }

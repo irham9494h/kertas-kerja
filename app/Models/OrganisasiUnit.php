@@ -10,6 +10,18 @@ class OrganisasiUnit extends Model
 
     protected $guarded = [];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($model) {
+            foreach ($model->sub_unit as $sub_unit) {
+                $sub_unit->delete();
+            }
+            return true;
+        });
+    }
+
     public function bidang()
     {
         return $this->belongsTo(OrganisasiBidang::class);
@@ -17,6 +29,12 @@ class OrganisasiUnit extends Model
 
     public function sub_unit()
     {
-        return $this->hasMany(OrganisasiSubUnit::class);
+        return $this->hasMany(OrganisasiSubUnit::class, 'unit_id');
     }
+
+    public function kertas_kerja()
+    {
+        return $this->hasMany(KertasKerja::class, 'unit_id', 'id');
+    }
+
 }

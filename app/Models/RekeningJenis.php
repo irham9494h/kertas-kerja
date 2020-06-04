@@ -10,6 +10,18 @@ class RekeningJenis extends Model
 
     protected $guarded = [];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($model) {
+            foreach ($model->obyek as $obyek) {
+                $obyek->delete();
+            }
+            return true;
+        });
+    }
+
     public function kelompok()
     {
         return $this->belongsTo(RekeningKelompok::class);
@@ -17,7 +29,12 @@ class RekeningJenis extends Model
 
     public function obyek()
     {
-        return $this->hasMany(RekeningObyek::class);
+        return $this->hasMany(RekeningObyek::class, 'jenis_id');
+    }
+
+    public function kertas_kerja()
+    {
+        return $this->hasMany(KertasKerja::class, 'jenis_id', 'id');
     }
 
 }

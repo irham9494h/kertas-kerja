@@ -1,0 +1,122 @@
+const sbThnUrl = window.location.origin + '/sb/t/';
+const confirmDelete = {
+    title: 'Apakah Anda yakin?',
+    text: "Data yang telah dihapus tidak dapat dikembalikan!",
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Ya, hapus sekarang!',
+    cancelButtonText: 'Tidak, batal hapus!',
+    reverseButtons: true
+};
+
+$(function () {
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    $('#btnTambahKertasKerja').on('click', function (e) {
+        e.preventDefault();
+        $('#modalFormKertasKerja').text('Form Tambah Kertas Kerja');
+        $('#btnSimpanKertasKerja').show();
+        $('#btnSimpanUbahKertasKerja').hide();
+        $('#formKertasKerja').trigger('reset');
+        $('#modalKertasKerja').modal('show');
+    });
+
+    $('#btnSimpanKertasKerja').on('click', function (e) {
+        e.preventDefault();
+        var html = '';
+        $.ajax({
+            type: 'POST',
+            url: sbThnUrl + 'store',
+            dataType: 'json',
+            data: $('#formKertasKerja').serialize(),
+            success: function (data) {
+                if (data.status) {
+                    $('#modalKertasKerja').modal('hide');
+                    fecthTahun();
+                    successSwal('Berhasil menambah data urusan.');
+                } else {
+                    showError(data.error, 'formKertasKerja');
+                }
+            },
+        });
+    });
+
+});
+
+function successSwal(message) {
+    return Swal.fire(
+        'Berhasil!',
+        message,
+        'success'
+    );
+}
+
+function showError(error, form) {
+    $.each(error, function (key, value) {
+        $('#' + form).find($('input[name=' + key + ']')).addClass('is-invalid');
+        $('#' + form).find($('#' + key + '_feedback')).text(value);
+    });
+}
+
+function fecthTahun() {
+    $.ajax({
+        type: 'GET',
+        url: sbThnUrl + 'fetch-tahun',
+        dataType: 'json',
+        success: function (data) {
+            var html = '';
+            if (data.data.length > 0) {
+                for (var i = 0; i < data.data.length; i++) {
+                    html += '<tr id="rowKertasKerja' + data.data[i].id + '">';
+                    html += '<td id="rowTahun' + data.data[i].id + '">' + data.data[i].tahun + '</td>';
+                    if (data.data[i].deskripsi !== null) {
+                        html += '<td id="rowDeskripsi' + data.data[i].id + '">' + data.data[i].deskripsi + '</td>';
+                    } else {
+                        html += '<td id="rowDeskripsi' + data.data[i].id + '">-</td>';
+                    }
+                    html += '<td>';
+                    html += '<div class="btn-group btn-group-xs">';
+                    html += '<button class="btn btn-outline-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-bars"></i></button>';
+                    html += '<div class="dropdown-menu dropdown-menu-right">';
+                    html += '<a href="" class="dropdown-item" type="button">Buka</a>';
+                    html += '<button class="dropdown-item" type="button" id="btnHapusKertasKerja" data-id="' + data.data[i].id + '" onclick="deleteKertasKerja(' + data.data[i].id + ')">Hapus</button>';
+                    html += '</div></div>';
+                    html += '</td>';
+                    html += '</tr>';
+                }
+                $('#tableKertasKerjaBody').html(html);
+            } else {
+                $('#tableKertasKerjaBody').html('<tr><td colspan="3" class="text-center">tidak ada data</td></tr>');
+            }
+        },
+    });
+}
+
+function deleteKertasKerja(id) {
+    Swal.fire(confirmDelete).then((result) => {
+        if (result.value) {
+            $.ajax({
+                type: 'GET',
+                url: sbThnUrl + 'delete/' + id,
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status) {
+                        fecthTahun();
+                        successSwal('Berhasil menghapus data kertas kerja.');
+                        // $('#rowKertasKerja' + id).remove();
+                    }
+                },
+            });
+        }
+    })
+}
+
+
+

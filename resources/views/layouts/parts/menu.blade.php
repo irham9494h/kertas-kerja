@@ -22,13 +22,16 @@
                     </a>
 
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item @yield('menu-rekening')" href="#">Rekening</a>
+                        <a class="dropdown-item @yield('menu-rekening')" href="{{route('rek.akun.index')}}">Rekening</a>
                         <a class="dropdown-item @yield('menu-organisasi')" href="{{route('org.urusan.index')}}">Organisasi</a>
                     </div>
                 </li>
+                <li class="nav-item @yield('menu-kertas-kerja')">
+                    <a href="{{route('sb-tahun')}}" class="nav-link">Kertas Kerja</a>
+                </li>
                 @can('isSuperAdmin')
                     <li class="nav-item @yield('menu-menejemen-pengguna')">
-                        <a href="{{route('manajemen-pengguna.index')}}" class="nav-link">Manajemen Pengguna</a>
+                        <a href="{{route('user.index')}}" class="nav-link">Manajemen Pengguna</a>
                     </li>
                 @endcan
             </ul>

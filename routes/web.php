@@ -23,8 +23,10 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::group(['middleware' => 'auth'], function () {
 
+    Route::get('manajemen-pengguna', 'ManajemenPenggunaController@index')->name('user.index');
+    Route::get('manajemen-pengguna/fetch', 'ManajemenPenggunaController@fetchPengguna')->name('user.fetch');
     Route::get('manajemen-pengguna/json', 'ManajemenPenggunaController@json')->name('user-json');
-    Route::resource('manajemen-pengguna', 'ManajemenPenggunaController');
+    Route::post('manajemen-pengguna/store', 'ManajemenPenggunaController@store')->name('user.store');
 
     Route::group(['prefix' => 'organisasi'], function () {
 
@@ -72,4 +74,86 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
     });
+
+    Route::group(['prefix' => 'rekening'], function () {
+
+        Route::group(['prefix' => 'akun'], function () {
+
+            Route::get('/', 'RekeningController@index')->name('rek.akun.index');
+            Route::post('/store', 'RekeningController@storeRekAkun')->name('rek.akun.store');
+            Route::get('/show/{id}', 'RekeningController@showRekAkun')->name('rek.akun.show');
+            Route::put('/update/{id}', 'RekeningController@updateRekAkun')->name('rek.akun.update');
+            Route::get('/delete/{id}', 'RekeningController@deleteRekAkun')->name('rek.akun.delete');
+
+        });
+
+        Route::group(['prefix' => 'kelompok'], function () {
+
+            Route::get('/', 'RekeningController@getKelompok')->name('rek.kelompok.index');
+            Route::get('/by-akun/{id}', 'RekeningController@getKelompokByAkun')->name('rek.kelompok.by-akun');
+            Route::post('/store', 'RekeningController@storeKelompok')->name('rek.kelompok.store');
+            Route::get('/show/{id}', 'RekeningController@showKelompok')->name('rek.kelompok.show');
+            Route::put('/update/{id}', 'RekeningController@updateKelompok')->name('rek.kelompok.update');
+            Route::get('/delete/{id}', 'RekeningController@deleteKelompok')->name('rek.kelompok.delete');
+
+        });
+
+        Route::group(['prefix' => 'jenis'], function () {
+
+            Route::get('/', 'RekeningController@getJenis')->name('rek.jenis.index');
+            Route::get('/by-kelompok/{id}', 'RekeningController@getJenisByKelompok')->name('rek.jenis.by-kelompok');
+            Route::post('/store', 'RekeningController@storeJenis')->name('rek.jenis.store');
+            Route::get('/show/{id}', 'RekeningController@showJenis')->name('rek.jenis.show');
+            Route::put('/update/{id}', 'RekeningController@updateJenis')->name('rek.jenis.update');
+            Route::get('/delete/{id}', 'RekeningController@deleteJenis')->name('rek.jenis.delete');
+
+        });
+
+        Route::group(['prefix' => 'objek'], function () {
+
+            Route::get('/', 'RekeningController@getObjek')->name('rek.objek.index');
+            Route::get('/by-jenis/{id}', 'RekeningController@getObjekByJenis')->name('org.objek.by-jenis');
+            Route::post('/store', 'RekeningController@storeObjek')->name('rek.objek.store');
+            Route::get('/show/{id}', 'RekeningController@showObjek')->name('rek.objek.show');
+            Route::put('/update/{id}', 'RekeningController@updateObjek')->name('rek.objek.update');
+            Route::get('/delete/{id}', 'RekeningController@deleteObjek')->name('rek.objek.delete');
+
+        });
+    });
+
+    Route::group(['prefix' => 'sb'], function () {
+        Route::get('/t', 'KertasKerjaController@tahunSumberDana')->name('sb-tahun');
+        Route::get('/t/fetch-tahun', 'KertasKerjaController@fetchTahun')->name('sb-tahun.fetch');
+        Route::post('/t/store', 'KertasKerjaController@storeTahun')->name('sb-tahun.store');
+        Route::get('/t/delete/{tahun}', 'KertasKerjaController@destroyTahun')->name('sb-tahun.delete');
+
+        Route::get('/t/{tahun}/kertas-kerja', 'KertasKerjaController@tanggalKertasKerja')->name('sb-tahun.kertas-kerja');
+
+        Route::get('t/{tahun}/kertas-kerja/d/{tanggal}/list', 'KertasKerjaController@fetchPendapatan')->name('sb-tahun.fetch-pendapatan');
+        Route::get('t/kertas-kerja/d/{tanggal}/list/json', 'KertasKerjaController@fetchPendapatanJson');
+        Route::post('t/kertas-kerja/d/store-pendapatan', 'KertasKerjaController@storePendapatan');
+
+        Route::get('t/kertas-kerja/d/{tanggal}/list/pend/json', 'KertasKerjaController@fetchBelanja');
+
+        Route::post('t/kertas-kerja/d/update-nominal', 'KertasKerjaController@updateNominal');
+
+        Route::post('t/kertas-kerja/d/store-belanja', 'KertasKerjaController@storeBelanja');
+    });
+
+    Route::get('sb-thn/{sb_tahun}/kertas-kerja/', 'TahunKertasKerjaController@rencanaAnggaran')->name('kertas-kerja.rencana-anggaran');
+
+    //Tanggal kertas kerja
+    Route::post('sb-tgl/store', 'TanggalKertasKerjaController@store')->name('sb-tahun.store');
+    Route::get('sb-tgl/delete/{sd_tanggal}', 'TanggalKertasKerjaController@destroy')->name('sb-tahun.delete');
+//    Route::get('sb-tgl/fetch-kertas-kerja/{sd_tanggal}', 'TanggalKertasKerjaController@fetchKertasKerja')->name('sb-tahun.fetch-kertas-kerja');
+
+    //KERTAS KERJA
+    //pendapatan
+    Route::get('kertas-kerja/{tanggal_id}/all', 'TanggalKertasKerjaController@fetchKertasKerja')->name('kertas-kerja.pendapatan.all');
+    Route::post('sb-tgl/pendapatan/store', 'TanggalKertasKerjaController@storePendapatan')->name('sb-tahun.pendapatan.store');
+    Route::post('sb-tgl/pendapatan/update-nominal', 'TanggalKertasKerjaController@updateNominal')->name('sb-tahun.pendapatan.update-nominal');
+
+    //Belanja
+    Route::get('sb-tgl/belanja/{tanggal_id}/all', 'TanggalKertasKerjaController@fetchBelanja')->name('sb-tahun.belanja  .all');
+
 });

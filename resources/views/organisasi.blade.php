@@ -234,10 +234,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" id="btnSimpanUrusan">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanUrusan">
                             Simpan
                         </button>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahUrusan"
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahUrusan"
                                 onclick="updateUrusan(event)" style="display: none">Simpan Perubahan
                         </button>
                     </div>
@@ -285,10 +285,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" id="btnSimpanBidang">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanBidang">
                             Simpan
                         </button>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahBidang"
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahBidang"
                                 onclick="updateBidang(event)" style="display: none">Simpan Perubahan
                         </button>
                     </div>
@@ -336,10 +336,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" id="btnSimpanUnit">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanUnit">
                             Simpan
                         </button>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahUnit"
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahUnit"
                                 onclick="updateUnit(event)" style="display: none">Simpan Perubahan
                         </button>
                     </div>
@@ -387,10 +387,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" id="btnSimpanSubUnit">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanSubUnit">
                             Simpan
                         </button>
-                        <button type="submit" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahSubUnit"
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahSubUnit"
                                 onclick="updateSubUnit(event)" style="display: none">Simpan Perubahan
                         </button>
                     </div>
