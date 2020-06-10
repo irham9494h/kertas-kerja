@@ -16,6 +16,7 @@ const confirmDelete = {
 let oldNominal = 0;
 let tanggalKertasKerja = 0;
 let tanggalIDKertasKerja = 0;
+let activeTab = 'pendapatan';
 
 $(function () {
     $('#tanggal').daterangepicker({
@@ -130,7 +131,7 @@ $(function () {
                     $('#btnDeleteTanggal').remove();
                     html = '';
                     html += ' <div class="btn-group btn-group-xs" role="group" id="tglKertasKerja' + data.data.id + '">';
-                    html += '<button type="button" class="btn btn-xs btn-outline-dark btn-kertas-kerja" onclick="fetchKertasKerja(' + '\'' + data.data.tanggal + '\'' + ', ' + '\'' + data.data.id + '\'' + ')" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</button>';
+                    html += '<a href="' + window.location.origin + '/sb/t/' + data.data.sd_tahun_id + '/kertas-kerja/d/' + data.data.id + '/list' + '" class="btn btn-xs btn-outline-dark btn-kertas-kerja" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</a>';
                     html += '<button type="button" class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal" data-tanggal-id="' + data.data.id + '" onclick="deleteTanggalKertasKerja(' + data.data.id + ')"><i class="fa fa-times"></i></button>';
                     html += '</div>';
 
@@ -366,9 +367,21 @@ $('#btnSimpanItemPendapatan').on('click', function (e) {
 
 function editItem(id, nominal, e) {
     e.preventDefault();
+    activeTab = 'pendapatan';
     $('#kertasKerjaId').val(id);
     $('#updateNominalTanggalId').val(tanggalIDKertasKerja);
     newNominal.set(nominal);
+    oldNominal = nominal;
+    $('#modalNominal').modal('show')
+}
+
+function editItemBelanja(id, nominal, e) {
+    e.preventDefault();
+    activeTab = 'belanja';
+    $('#kertasKerjaId').val(id);
+    $('#updateNominalTanggalId').val(tanggalIDKertasKerja);
+    newNominal.set(nominal);
+    oldNominal = nominal;
     $('#modalNominal').modal('show')
 }
 
@@ -376,37 +389,74 @@ $('#btnSimpanUbahNominal').on('click', function (e) {
     e.preventDefault();
     newNominal.unformat()
     var nominal = $('#newNominal').val()
+    var updateUrl = '';
+    if (activeTab === 'pendapatan') {
+        updateUrl = 'update-nominal';
+    } else if (activeTab === 'belanja') {
+        updateUrl = 'update-nominal-belanja';
+    }
     $.ajax({
         type: 'POST',
-        url: sbUrl + 'update-nominal',
+        url: sbUrl + updateUrl,
         dataType: 'json',
-        data: {'new_nominal': nominal, 'uraian_id': $('#kertasKerjaId').val(), 'sd_tanggal_id': $('#updateNominalTanggalId').val()},
+        data: {
+            'new_nominal': nominal,
+            'uraian_id': $('#kertasKerjaId').val(),
+            'sd_tanggal_id': $('#updateNominalTanggalId').val()
+        },
         success: function (data) {
             console.log(data)
-            tot = new AutoNumeric('#totalNilai' + data.data.unit_id, {
-                digitGroupSeparator: '.',
-                decimalCharacter: ',',
-                decimalCharacterAlternative: '.',
-            });
             var oldTotal = 0;
             var selisih = 0;
             if (data.status) {
                 successSwal(data.message);
                 $('#modalNominal').modal('hide');
-                oldTotal = tot.getNumber();
-                if (oldNominal > data.data.nilai) {
-                    selisih = oldNominal - nominal;
-                    console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
-                    $('#totalNilai' + data.data.unit_id).html(formatRupiah(oldTotal - selisih)).attr('data-total', oldTotal - selisih);
-                } else if (oldNominal < nominal) {
-                    selisih = data.data.nilai - oldNominal;
-                    console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
-                    $('#totalNilai' + data.data.unit_id).html(formatRupiah(oldTotal + selisih)).attr('data-total', oldTotal + selisih);
-                }
+                if (activeTab === 'pendapatan') {
+                    tot = new AutoNumeric('#totalNilai' + data.data.unit_id, {
+                        digitGroupSeparator: '.',
+                        decimalCharacter: ',',
+                        decimalCharacterAlternative: '.',
+                    });
+                    oldTotal = tot.getNumber();
+                    if (oldNominal > data.data.nilai) {
+                        selisih = oldNominal - nominal;
+                        console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
+                        $('#totalNilai' + data.data.unit_id).html(formatRupiah(oldTotal - selisih)).attr('data-total', oldTotal - selisih);
+                    } else if (oldNominal < nominal) {
+                        selisih = data.data.nilai - oldNominal;
+                        console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
+                        $('#totalNilai' + data.data.unit_id).html(formatRupiah(oldTotal + selisih)).attr('data-total', oldTotal + selisih);
+                    }
 
-                $('#item' + data.data.id).attr('onclick', 'editItem(' + data.data.id + ', ' + nominal + ', event)')
-                    .text(formatRupiah(nominal));
-                $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
+                    $('#item' + data.data.id).attr('onclick', 'editItem(' + data.data.id + ', ' + nominal + ', event)')
+                        .text(formatRupiah(nominal));
+                    $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
+                } else if (activeTab === 'belanja') {
+                    tBelanja = new AutoNumeric('#totalNilaiBelanja' + data.data.unit_id, {
+                        digitGroupSeparator: '.',
+                        decimalCharacter: ',',
+                        decimalCharacterAlternative: '.',
+                    });
+                    oldTotal = tBelanja.getNumber();
+                    console.log(data.data.unit_id)
+                    console.log($('#totalNilaiBelanja' + data.data.unit_id).text())
+                    if (oldNominal > data.data.nilai) {
+                        selisih = oldNominal - nominal;
+                        console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
+                        $('#totalNilaiBelanja' + data.data.unit_id).html(formatRupiah(oldTotal - selisih)).attr('data-total', oldTotal - selisih);
+                    } else if (oldNominal < nominal) {
+                        selisih = data.data.nilai - oldNominal;
+                        console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
+                        $('#totalNilaiBelanja' + data.data.unit_id).html(formatRupiah(oldTotal + selisih)).attr('data-total', oldTotal + selisih);
+                    }
+
+                    $('#itemBelanja' + data.data.id).attr('onclick', 'editItemBelanja(' + data.data.id + ', ' + nominal + ', event)')
+                        .text(formatRupiah(nominal));
+                    $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
+                    $('#totalBelanja').text(formatRupiah(data.totalBelanja));
+                } else if (activeTab === 'pembiayaan') {
+
+                }
             } else {
                 errorSwal(data.message);
             }
@@ -475,7 +525,7 @@ function fetchKertasKerjaBelanja(tanggalId) {
                     for (j = 0; j < data.data[i].list_uraian.length; j++) {
                         html += '<tr>';
                         html += '<td style="width: 80%">' + data.data[i].list_uraian[j].uraian + '</td>';
-                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="item' + data.data[i].list_uraian[j].id + '" onclick="editItem(' + data.data[i].list_uraian[j].id + ',' + data.data[i].list_uraian[j].nilai + ', event)">' + formatRupiah(data.data[i].list_uraian[j].nilai) + '</a></td>';
+                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="itemBelanja' + data.data[i].list_uraian[j].id + '" onclick="editItemBelanja(' + data.data[i].list_uraian[j].id + ',' + data.data[i].list_uraian[j].nilai + ', event)">' + formatRupiah(data.data[i].list_uraian[j].nilai) + '</a></td>';
                         html += '</tr>';
                         total += data.data[i].list_uraian[j].nilai;
                     }
@@ -521,7 +571,7 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
                         html = '';
                         html += '<tr>';
                         html += '<td style="width: 80%">' + data.data.uraian + '</td>';
-                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" onclick="editItem(' + data.data.id + ', ' + data.data.nilai + ', event)">' + formatRupiah(data.data.nilai) + '</a></td>';
+                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" onclick="editItemBelanja(' + data.data.id + ', ' + data.data.nilai + ', event)">' + formatRupiah(data.data.nilai) + '</a></td>';
                         html += '</tr>';
                         $('#tblOpdBelanja' + data.data.unit_id).append(html);
                         newTotal = parseInt($('#totalNilaiBelanja' + data.data.unit_id).data('total')) + parseInt(data.data.nilai);
@@ -540,7 +590,7 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
                         html += '<tbody id="tblOpdBelanja' + data.data.unit_id + '">';
                         html += '<tr>';
                         html += '<td style="width: 80%">' + data.data.uraian + '</td>';
-                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="item' + data.data.id + '" onclick="editItem(' + data.data.id + ', ' + data.data.nilai + ', event)">' + formatRupiah(data.data.nilai) + '</a></td>';
+                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="itemBelanja' + data.data.id + '" onclick="editItemBelanja(' + data.data.id + ', ' + data.data.nilai + ', event)">' + formatRupiah(data.data.nilai) + '</a></td>';
                         html += '</tr>';
                         html += '</tbody>';
                         html += '</table>';

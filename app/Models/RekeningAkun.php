@@ -27,4 +27,9 @@ class RekeningAkun extends Model
         return $this->hasMany(RekeningKelompok::class, 'akun_id');
     }
 
+    public function tahun_rekening()
+    {
+        return $this->belongsTo(TahunRekening::class);
+    }
+
 }

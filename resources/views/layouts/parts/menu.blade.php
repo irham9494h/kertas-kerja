@@ -26,12 +26,31 @@
                         <a class="dropdown-item @yield('menu-organisasi')" href="{{route('org.urusan.index')}}">Organisasi</a>
                     </div>
                 </li>
-                <li class="nav-item @yield('menu-kertas-kerja')">
-                    <a href="{{route('sb-tahun')}}" class="nav-link">Kertas Kerja</a>
+                <li class="nav-item dropdown @yield('menu-kk')">
+                    <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                        Kertas Kerja <span class="caret"></span>
+                    </a>
+
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item @yield('menu-kertas-kerja')" href="{{route('sb-tahun')}}">Kertas
+                            Kerja</a>
+                        <a class="dropdown-item @yield('menu-laporan')" href="">Laporan</a>
+                    </div>
                 </li>
                 @can('isSuperAdmin')
-                    <li class="nav-item @yield('menu-menejemen-pengguna')">
-                        <a href="{{route('user.index')}}" class="nav-link">Manajemen Pengguna</a>
+                    <li class="nav-item dropdown @yield('menu-pengaturan')">
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                            Pengaturan <span class="caret"></span>
+                        </a>
+
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item @yield('menu-tahun-rekening')" href="{{route('tahun-rek.index')}}">Tahun
+                                Rekening</a>
+                            <a class="dropdown-item @yield('menu-menejemen-pengguna')" href="{{route('user.index')}}">Manajemen
+                                Pengguna</a>
+                        </div>
                     </li>
                 @endcan
             </ul>

@@ -227,6 +227,28 @@ class KertasKerjaController extends AppController
         return $this->storeFailedResponse();
     }
 
+    public function updateNominalBelanja(Request $request)
+    {
+        $itemKertasKerja = KertasKerjaBelanja::findOrFail($request->uraian_id);
+        $itemKertasKerja->nilai = $request->new_nominal;
+        $itemKertasKerja->save();
+
+        $totalBelanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
+        $totalSumberDana = KertasKerja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+            ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
+        $totalSumberDana = $totalSumberDana - $totalBelanja;
+
+        if ($itemKertasKerja)
+            return response()->json([
+                'status' => true,
+                'message' => 'Berhasil mengubah nominal.',
+                'totalSumberDana' => $totalSumberDana,
+                'totalBelanja' => $totalBelanja,
+                'data' => $itemKertasKerja], 200);
+
+        return $this->storeFailedResponse('Gagal mengubah nominal');
+    }
+
     /*
      * End of belanja --------------------------------------------------------------------------------------------------
      */

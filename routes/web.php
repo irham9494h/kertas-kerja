@@ -28,6 +28,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('manajemen-pengguna/json', 'ManajemenPenggunaController@json')->name('user-json');
     Route::post('manajemen-pengguna/store', 'ManajemenPenggunaController@store')->name('user.store');
 
+    Route::get('tahun-rekening', 'TahunRekeningController@index')->name('tahun-rek.index');
+    Route::get('tahun-rekening/fetch', 'TahunRekeningController@fetch')->name('tahun-rek.fetch');
+    Route::post('tahun-rekening/store', 'TahunRekeningController@store')->name('tahun-rek.store');
+    Route::put('tahun-rekening/update/{tahun_rekening}', 'TahunRekeningController@update')->name('tahun-rek.update');
+    Route::put('tahun-rekening/activate/{tahun_rekening}', 'TahunRekeningController@activate')->name('tahun-rek.activate');
+    Route::get('tahun-rekening/delete/{tahun_rekening}', 'TahunRekeningController@destroy')->name('tahun-rek.destroy');
+
     Route::group(['prefix' => 'organisasi'], function () {
 
         Route::group(['prefix' => 'urusan'], function () {
@@ -132,10 +139,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('t/{tahun}/kertas-kerja/d/{tanggal}/list', 'KertasKerjaController@fetchPendapatan')->name('sb-tahun.fetch-pendapatan');
         Route::get('t/kertas-kerja/d/{tanggal}/list/json', 'KertasKerjaController@fetchPendapatanJson');
         Route::post('t/kertas-kerja/d/store-pendapatan', 'KertasKerjaController@storePendapatan');
+        Route::post('t/kertas-kerja/d/update-nominal', 'KertasKerjaController@updateNominal');
 
         Route::get('t/kertas-kerja/d/{tanggal}/list/pend/json', 'KertasKerjaController@fetchBelanja');
+        Route::post('t/kertas-kerja/d/update-nominal-belanja', 'KertasKerjaController@updateNominalBelanja');
 
-        Route::post('t/kertas-kerja/d/update-nominal', 'KertasKerjaController@updateNominal');
 
         Route::post('t/kertas-kerja/d/store-belanja', 'KertasKerjaController@storeBelanja');
     });

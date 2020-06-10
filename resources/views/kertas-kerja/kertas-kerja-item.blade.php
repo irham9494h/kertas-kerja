@@ -96,9 +96,9 @@
                                        class="btn btn-xs btn-kertas-kerja {{$tanggal->id == $tanggal_id ? 'btn-dark' :'btn-outline-dark'}}"
                                        id="btnFetchKertasKerja{{$tanggal->id}}">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
                                     @if($loop->last)
-                                        <a href="{{route('kertas-kerja.pendapatan.all', $tanggal->id)}}"
+                                        <button onclick="deleteTanggalKertasKerja('{{$tanggal->id}}')"
                                            class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal"><i
-                                                class="fa fa-times"></i></a>
+                                                class="fa fa-times"></i></button>
                                     @endif
                                 </div>
                             @endforeach
