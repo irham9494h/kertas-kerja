@@ -51,6 +51,10 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+
+        input[type="checkbox"][readonly] {
+            pointer-events: none;
+        }
     </style>
 @endsection
 
@@ -353,7 +357,10 @@
 
                         <div class="form-group">
                             <label for="uraian"><span class="text-danger">*</span>Uraian</label>
-                            <textarea name="uraian" id="uraian" rows="2" class="form-control"></textarea>
+                            <textarea name="uraian_belanja" id="uraian" rows="2" class="form-control"></textarea>
+                            <div class="invalid-feedback" id="uraian_belanja_feedback">
+                                Please provide a valid city.
+                            </div>
                         </div>
 
                         <div class="row">
@@ -364,12 +371,12 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">RP.</span>
                                         </div>
-                                        <input type="text" class="form-control format-nilai" autofocus name="nilai"
+                                        <input type="text" class="form-control format-nilai" autofocus name="nilai_belanja"
                                                id="nilaiBelanja" data-a-dec="," data-a-sep=".">
                                     </div>
-                                    {{--                            <div class="invalid-feedback" id="nilai_feedback">--}}
-                                    {{--                                Please provide a valid city.--}}
-                                    {{--                            </div>--}}
+                                    <div class="invalid-feedback" id="nilai_belanja_feedback">
+                                        Please provide a valid city.
+                                    </div>
                                     <span class="text-danger mt-1" id="nilaiWarning" style="display: none"><small>Nilai yang dimasukan melebihi pendapatan.</small></span>
                                 </div>
                             </div>
@@ -398,9 +405,9 @@
                             <label class="form-check-label" for="pembiayaanCheckbox"><strong>Gunakan Pembiayaan</strong></label>
                         </div>
 
-                        <div class="form-group" id="belanjaPembiayaan" style="display: none">
+                        <div class="form-group" id="belanjaPembiayaan">
                             <select name="pembiayaan_id" id="rekeningBelanjaPembiayaan" class="form-control"
-                                    style="width: 100%;">
+                                    style="width: 100%;" disabled>
 
                                 @foreach($rekPembiayaans as $pembiayaan)
                                     <option value="{{$pembiayaan->id}}">
@@ -417,7 +424,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanItemBelanja">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanItemBelanja"
+                                style="display: block">
                             Simpan
                         </button>
                     </div>

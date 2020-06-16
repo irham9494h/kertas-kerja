@@ -197,10 +197,10 @@ class KertasKerjaController extends AppController
             ->sum('nilai');
         $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $tanggal_id)->sum('nilai');
 
-        if ($totalBelanja > $pendapatan){
+        if ($totalBelanja > $pendapatan) {
             $totalSumberDana = 0;
             $totalPembiayaan = $totalPembiayaan - $totalBelanjaPembiayaan;
-        }else{
+        } else {
             $totalSumberDana = $pendapatan - $totalBelanja;
         }
 
@@ -219,64 +219,64 @@ class KertasKerjaController extends AppController
 
     public function storeBelanja(Request $request)
     {
+
         $nilai_pembiayaan = 0;
         $data = [];
 
         $validator = Validator::make($request->all(), [
             'jenis_id' => 'required',
-            'nilai' => 'required',
+            'nilai_belanja' => 'required',
             'unit_id' => 'required',
-            'uraian' => 'required',
+            'uraian_belanja' => 'required',
         ], [
             'jenis_id.required' => 'Anda belum memilih rekening.',
-            'nilai.required' => 'Nilai pendapatan tidak boleh kosong.',
+            'nilai_belanja.required' => 'Nilai pendapatan tidak boleh kosong.',
             'unit_id.required' => 'Anda belum memilih OPD.',
-            'uraian.required' => 'uraian tidak boleh kosong.',
+            'uraian_belanja.required' => 'uraian tidak boleh kosong.',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'error' => $validator->errors()]);
         }
+        return response()->json($request->all());
 
         if ($request->has('pembiayaan_checkbox')) {
             $nilai_pembiayaan = $request->nilai - $request->total_pendapatan;
-//            $request = $request->except(['total_pendapatan', 'pembiayaan_checkbox']);
-//            $request = (object)array_merge($request, ['nilai_pembiayaan' => $nilai_pembiayaan]);
-
             $data = [
                 'jenis_id' => $request->jenis_id,
-                'nilai' => $request->nilai,
+                'nilai' => $request->nilai_belanja,
                 'nilai_pembiayaan' => $nilai_pembiayaan,
                 'pembiayaan_id' => $request->pembiayaan_id,
                 'pendapatan_id' => $request->pendapatan_id,
                 'sd_tanggal_id' => $request->sd_tanggal_id,
                 'unit_id' => $request->unit_id,
-                'uraian' => $request->uraian,
+                'uraian' => $request->uraian_belanja,
             ];
         } else {
             $data = [
                 'jenis_id' => $request->jenis_id,
-                'nilai' => $request->nilai,
+                'nilai' => $request->nilai_belanja,
                 'pendapatan_id' => $request->pendapatan_id,
                 'sd_tanggal_id' => $request->sd_tanggal_id,
                 'unit_id' => $request->unit_id,
-                'uraian' => $request->uraian,
+                'uraian' => $request->uraian_belanja,
             ];
         }
-//        return response()->json($request);
 
         $belanja = KertasKerjaBelanja::create($data);
-        $totalBelanja = KertasKerjaBelanja::where('sd_tanggal_id', '= ', $request->sd_tanggal_id)->sum('nilai');
-        $totalSumberDana = KertasKerja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
-            ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
 
-        if ($totalBelanja > $totalSumberDana){
+        $totalBelanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
+        $totalBelanjaPembiayaan = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai_pembiayaan');
+        $pendapatan = KertasKerja::where('jenis_item', '=', 'pendapatan')->where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+            ->sum('nilai');
+        $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
+
+        if ($totalBelanja > $pendapatan) {
             $totalSumberDana = 0;
-        }else{
-            $totalSumberDana = $totalSumberDana - $totalBelanja;
+            $totalPembiayaan = $totalPembiayaan - $totalBelanjaPembiayaan;
+        } else {
+            $totalSumberDana = $pendapatan - $totalBelanja;
         }
-
-        $totalPembiayaan = $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
 
         if ($belanja)
             return response()->json([

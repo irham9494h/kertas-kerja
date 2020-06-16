@@ -572,7 +572,7 @@ function fetchKertasKerjaBelanja(tanggalId) {
                     html += '<th>Nilai</th>';
                     html += '</tr>';
                     html += '</thead>';
-                    html += '<tbody id="tblOpd' + data.data[i].unit_id + '">';
+                    html += '<tbody id="tblOpdBelanja' + data.data[i].unit_id + '">';
                     for (j = 0; j < data.data[i].list_uraian.length; j++) {
                         html += '<tr>';
                         html += '<td style="width: 80%">' + data.data[i].list_uraian[j].uraian + '</td>';
@@ -602,8 +602,6 @@ $('#btnTambahBelanja').on('click', function () {
     $('#formItemBelanja').trigger('reset')
     $('#nilaiWarning').hide();
     $('#pembiayaanWarning').hide();
-    $('#belanjaPembiayaan').hide();
-    $('#pembiayaanCheckbox').attr("disabled", true);
 
     $('#tanggalId').val(tanggalIDKertasKerja);
     $('#belanjaTotalPendapatan').val(totalPendapatan);
@@ -615,20 +613,28 @@ $('#nilaiBelanja').keyup(function () {
     var nilai = $('#nilaiBelanja').val();
     nilai = nilai.replace(/\./g, "");
     nilai = nilai.replace(/\,/g, ".");
-
     var selisih = nilai - totalPendapatan;
-    if (nilai > totalPendapatan){
+
+    if (nilai === "") {
+        // $('#rekeningBelanjaPembiayaan').attr("disabled", true);
+        // $('#btnSimpanItemBelanja').hide();
+    } else {
+        // $('#rekeningBelanjaPembiayaan').removeAttr("disabled");
+        // $('#btnSimpanItemBelanja').show();
+
+    }
+
+    if (nilai > totalPendapatan) {
         $('#nilaiWarning').show();
         $('#btnSimpanItemBelanja').hide();
         $('#pembiayaanCheckbox').removeAttr("disabled");
 
-        if (selisih > totalPembiayaan){
+        if (selisih > totalPembiayaan) {
             $('#pembiayaanWarning').show();
-        }else{
+        } else {
             $('#pembiayaanWarning').hide();
-            $('#btnSimpanItemBelanja').show();
         }
-    }else{
+    } else {
         $('#nilaiWarning').hide();
         $('#btnSimpanItemBelanja').show();
         $('#pembiayaanCheckbox').attr("disabled", true);
@@ -637,6 +643,18 @@ $('#nilaiBelanja').keyup(function () {
 });
 
 $('#pembiayaanCheckbox').on('click', function () {
+    var nilai = $('#nilaiBelanja').val();
+    nilai = nilai.replace(/\./g, "");
+    nilai = nilai.replace(/\,/g, ".");
+
+    var selisih = nilai - totalPendapatan;
+
+    if (selisih > totalPembiayaan) {
+        $('#btnSimpanItemBelanja').hide();
+    } else {
+        $('#btnSimpanItemBelanja').show();
+    }
+
     if ($(this).is(":checked")) {
         $('#belanjaPembiayaan').show();
     } else {
@@ -657,8 +675,13 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
         success: function (data) {
             console.log(data)
             var html = '';
-            $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
+            $('#totalSumberDana').text(formatRupiah(data.totalSumberDana)).show();
             totalPendapatan = data.totalSumberDana;
+            $('#totalBelanja').text(formatRupiah(data.totalBelanja)).show();
+            totalBelanja = data.totalBelanja;
+            $('#totalPembiayaan').text(formatRupiah(data.totalPembiayaan)).show();
+            totalPembiayaan = data.totalPembiayaan;
+            $('#itemKertasKerjaBelanjaLoader').html('');
             if (data.status) {
                 if ($('#belanjaContentTable').children().length > 0) {
                     if ($('#opdBelanja' + data.data.unit_id).children().length > 0) {
@@ -670,10 +693,10 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
                         $('#tblOpdBelanja' + data.data.unit_id).append(html);
                         newTotal = parseInt($('#totalNilaiBelanja' + data.data.unit_id).data('total' + data.data.unit_id)) + parseInt(data.data.nilai);
                         $('#totalNilaiBelanja' + data.data.unit_id).html(formatRupiah(newTotal)).attr('data-total' + data.data.unit_id, newTotal);
-                        $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
-                        totalPendapatan = data.totalSumberDana;
-                        $('#totalBelanja').text(formatRupiah(data.totalBelanja));
-                        totalBelanja = data.totalBelanja;
+                        // $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
+                        // totalPendapatan = data.totalSumberDana;
+                        // $('#totalBelanja').text(formatRupiah(data.totalBelanja));
+                        // totalBelanja = data.totalBelanja;
                     } else {
                         html = '';
                         html += '<table class="w-100 table table-sm mb-0">';
@@ -692,10 +715,10 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
                         html += '</table>';
                         $('#opdBelanja' + data.data.unit_id).html(html);
                         $('#totalNilaiBelanja' + data.data.unit_id).html('Rp. ' + formatRupiah(data.data.nilai)).attr('data-total' + data.data.unit_id, data.data.nilai);
-                        $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
-                             totalPendapatan = data.totalSumberDana;
-                        $('#totalBelanja').text(formatRupiah(data.totalBelanja));
-                        totalBelanja = data.totalBelanja;
+                        // $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
+                        //      totalPendapatan = data.totalSumberDana;
+                        // $('#totalBelanja').text(formatRupiah(data.totalBelanja));
+                        // totalBelanja = data.totalBelanja;
                     }
                     $('#modalItemBelanjan').modal('hide');
                 } else {
@@ -703,8 +726,11 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
                 }
                 $('#modalItemBelanjan').modal('hide');
                 successSwal('Berhsail')
+            }else {
+                errorSwal('Terdapat inputan yang masih kosong.')
+                // showError(data.error, 'formItemBelanja');
             }
-        },
+        }
     });
 
 });
