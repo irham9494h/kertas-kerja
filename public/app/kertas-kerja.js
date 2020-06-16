@@ -116,7 +116,7 @@ $(function () {
                     $('#btnDeleteTanggal').remove();
                     html = '';
                     html += ' <div class="btn-group btn-group-xs" role="group" id="tglKertasKerja' + data.data.id + '">';
-                    html += '<button type="button" class="btn btn-xs btn-outline-dark btn-kertas-kerja" onclick="fetchKertasKerja(' + '\'' + data.data.tanggal + '\'' + ', ' + '\'' + data.data.id + '\'' + ')" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</button>';
+                    html += '<a href="' + window.location.origin + '/sb/t/' + data.data.sd_tahun_id + '/kertas-kerja/d/' + data.data.id + '/list' + '" class="btn btn-xs btn-outline-dark btn-kertas-kerja" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</a>';
                     html += '<button type="button" class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal" data-tanggal-id="' + data.data.id + '" onclick="deleteTanggalKertasKerja(' + data.data.id + ')"><i class="fa fa-times"></i></button>';
                     html += '</div>';
 

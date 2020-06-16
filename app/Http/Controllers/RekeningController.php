@@ -6,6 +6,7 @@ use App\Models\RekeningAkun;
 use App\Models\RekeningJenis;
 use App\Models\RekeningKelompok;
 use App\Models\RekeningObyek;
+use App\Models\TahunRekening;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,8 +17,9 @@ class RekeningController extends AppController
  */
     public function index()
     {
-        $akuns = RekeningAkun::orderby('kode')->get();
-        return view('rekening', compact('akuns'));
+        $tahun = TahunRekening::where('status', '=', 1)->first();
+        $akuns = RekeningAkun::where('tahun_rekening_id', '=', $tahun->id)->orderby('kode')->get();
+        return view('rekening', compact('akuns', 'tahun'));
     }
 
     public function storeRekAkun(Request $request)

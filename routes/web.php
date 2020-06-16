@@ -142,10 +142,12 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('t/kertas-kerja/d/update-nominal', 'KertasKerjaController@updateNominal');
 
         Route::get('t/kertas-kerja/d/{tanggal}/list/pend/json', 'KertasKerjaController@fetchBelanja');
+        Route::post('t/kertas-kerja/d/store-belanja', 'KertasKerjaController@storeBelanja');
         Route::post('t/kertas-kerja/d/update-nominal-belanja', 'KertasKerjaController@updateNominalBelanja');
 
-
-        Route::post('t/kertas-kerja/d/store-belanja', 'KertasKerjaController@storeBelanja');
+        Route::get('t/kertas-kerja/d/{tanggal}/list/pembiayaan/json', 'KertasKerjaController@fetchPembiayaan');
+        Route::post('t/kertas-kerja/d/store-pembiayaan', 'KertasKerjaController@storePembiayaan');
+        Route::post('t/kertas-kerja/d/update-nominal-pembiayaan', 'KertasKerjaController@updateNominalPembiayaan');
     });
 
     Route::get('sb-thn/{sb_tahun}/kertas-kerja/', 'TahunKertasKerjaController@rencanaAnggaran')->name('kertas-kerja.rencana-anggaran');

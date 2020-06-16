@@ -97,7 +97,7 @@
                                        id="btnFetchKertasKerja{{$tanggal->id}}">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
                                     @if($loop->last)
                                         <button onclick="deleteTanggalKertasKerja('{{$tanggal->id}}')"
-                                           class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal"><i
+                                                class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal"><i
                                                 class="fa fa-times"></i></button>
                                     @endif
                                 </div>
@@ -129,8 +129,18 @@
                         <div class="tab-custom-content pl-3 mb-0 d-flex" id="kertasKerjaCustomeTitle">
                             <p class="text-muted mb-0">Kertas Kerja tanggal <span
                                     id="kertasKerjaTanggalTitle">{{date('d/m/Y', strtotime($tahun->tanggal->where('id', '=', $tanggal_id)->first()->tanggal))}}</span>
-                                <span id="statusBelanja" style="display: none"> | Total Belanja : Rp. <span id="totalBelanja" class="text-warning">0</span></span> | <span id="statusSumberDana">Total</span> Sumber Dana : Rp.
-                                <span id="totalSumberDana" class="text-danger">0</span>
+                                <span id="pendapatanSatatusText"> |
+                                    <span id="statusSumberDana">Total</span> Pendapatan : Rp.
+                                    <span id="totalSumberDana" class="text-danger">0</span>
+                                </span>
+                                <span id="belanjaStatusText" style="display: none"> |
+                                    <span id="statusBelanja">Total Belanja : Rp. </span>
+                                    <span id="totalBelanja" class="text-warning">0</span>
+                                </span>
+                                <span id="pembiayaanStatusText" style="display: none"> |
+                                    <span id="statusPembiayaan">Total Pembiayaan : Rp. </span>
+                                    <span id="totalPembiayaan" class="text-danger">0</span>
+                                </span>
                             </p>
                             <button class="btn btn-outline-secondary btn-xs ml-auto mr-2" id="btnTambahPendapatan"
                                     style="display: block"
@@ -163,7 +173,10 @@
                             </div>
                             <div class="tab-pane fade" id="pembiayaanContent" role="tabpanel"
                                  aria-labelledby="custom-tabs-two-messages-tab">
-                                pembiayaan
+                                <h3 class="text-center mt-3 pb-3" style="display: none" id="noDataPembiayaan">Tidak ada
+                                    data.</h3>
+                                <div class="d-flex justify-content-center" id="itemKertasKerjaPembiayaanLoader"></div>
+                                <div id="pembiayaanContentTable"></div>
                             </div>
                         </div>
                     </div>
@@ -290,7 +303,7 @@
     <!-- Modal Belanja -->
     <div class="modal fade" id="modalItemBelanjan" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="modalItemBelanjan" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-danger">
                     <h5 class="modal-title" id="modalFormItemBelanja">Form Tanggal Kertas Kerja</h5>
@@ -300,33 +313,41 @@
                 </div>
                 <form action="#" id="formItemBelanja">
                     <div class="modal-body">
-                        @csrf
-                        <input type="hidden" id="tanggalId" name="sd_tanggal_id">
-                        <div class="form-group">
-                            <label for="tanggal"><span class="text-danger">*</span>OPD</label>
-                            <select name="unit_id" id="opdBelanja" class="form-control" style="width: 100%;">
-                                @foreach($opds as $opd)
-                                    <option value="{{$opd->id}}">
-                                        {{$opd->bidang->urusan->kode.'.'.$opd->bidang->kode.'.'.$opd->kode.' '.$opd->nama_unit}}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="invalid-feedback" id="opd_feedback">
-                                Please provide a valid city.
-                            </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="rekening"><span class="text-danger">*</span>Rekening</label>
-                            <select name="jenis_id" id="rekeningBelanja" class="form-control" style="width: 100%;">
-                                @foreach($rekBelanjas as $belanja)
-                                    <option value="{{$belanja->id}}">
-                                        {{$belanja->kode_akun.'.'.$belanja->kode_kelompok.'.'.$belanja->kode.' '.$belanja->nama_jenis}}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="invalid-feedback" id="rekening_feedback">
-                                Please provide a valid city.
+                        <div class="row">
+                            <div class="col">
+                                @csrf
+                                <input type="hidden" id="tanggalId" name="sd_tanggal_id">
+                                <input type="hidden" id="belanjaTotalPendapatan" name="total_pendapatan">
+                                <div class="form-group">
+                                    <label for="tanggal"><span class="text-danger">*</span>OPD</label>
+                                    <select name="unit_id" id="opdBelanja" class="form-control" style="width: 100%;">
+                                        @foreach($opds as $opd)
+                                            <option value="{{$opd->id}}">
+                                                {{$opd->bidang->urusan->kode.'.'.$opd->bidang->kode.'.'.$opd->kode.' '.$opd->nama_unit}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback" id="opd_feedback">
+                                        Please provide a valid city.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="rekening"><span class="text-danger">*</span>Rekening</label>
+                                    <select name="jenis_id" id="rekeningBelanja" class="form-control"
+                                            style="width: 100%;">
+                                        @foreach($rekBelanjas as $belanja)
+                                            <option value="{{$belanja->id}}">
+                                                {{$belanja->kode_akun.'.'.$belanja->kode_kelompok.'.'.$belanja->kode.' '.$belanja->nama_jenis}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback" id="rekening_feedback">
+                                        Please provide a valid city.
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -335,34 +356,64 @@
                             <textarea name="uraian" id="uraian" rows="2" class="form-control"></textarea>
                         </div>
 
-                        <div class="form-group">
-                            <label for="nilaiBelanja"><span class="text-danger">*</span>Nilai</label>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">RP.</span>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="nilaiBelanja"><span class="text-danger">*</span>Nilai</label>
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">RP.</span>
+                                        </div>
+                                        <input type="text" class="form-control format-nilai" autofocus name="nilai"
+                                               id="nilaiBelanja" data-a-dec="," data-a-sep=".">
+                                    </div>
+                                    {{--                            <div class="invalid-feedback" id="nilai_feedback">--}}
+                                    {{--                                Please provide a valid city.--}}
+                                    {{--                            </div>--}}
+                                    <span class="text-danger mt-1" id="nilaiWarning" style="display: none"><small>Nilai yang dimasukan melebihi pendapatan.</small></span>
                                 </div>
-                                <input type="text" class="form-control format-nilai" autofocus name="nilai"
-                                       id="nilaiBelanja" data-a-dec="," data-a-sep=".">
                             </div>
-                            {{--                            <div class="invalid-feedback" id="nilai_feedback">--}}
-                            {{--                                Please provide a valid city.--}}
-                            {{--                            </div>--}}
+
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="rekening"><span class="text-danger">*</span>Sumber Dana</label>
+                                    <select name="pendapatan_id" id="rekeningSumberDana" class="form-control"
+                                            style="width: 100%;">
+                                        @foreach($rekPendapatans as $rek)
+                                            <option value="{{$rek->id}}">
+                                                {{$rek->kode_akun.'.'.$rek->kode_kelompok.'.'.$rek->kode.' '.$rek->nama_jenis}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback" id="rekening_feedback">
+                                        Please provide a valid city.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="rekening"><span class="text-danger">*</span>Sumber Dana</label>
-                            <select name="pendapatan_id" id="rekeningSumberDana" class="form-control"
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="pembiayaanCheckbox"
+                                   name="pembiayaan_checkbox" value="1" disabled>
+                            <label class="form-check-label" for="pembiayaanCheckbox"><strong>Gunakan Pembiayaan</strong></label>
+                        </div>
+
+                        <div class="form-group" id="belanjaPembiayaan" style="display: none">
+                            <select name="pembiayaan_id" id="rekeningBelanjaPembiayaan" class="form-control"
                                     style="width: 100%;">
-                                @foreach($rekPendapatans as $rek)
-                                    <option value="{{$rek->id}}">
-                                        {{$rek->kode_akun.'.'.$rek->kode_kelompok.'.'.$rek->kode.' '.$rek->nama_jenis}}
+
+                                @foreach($rekPembiayaans as $pembiayaan)
+                                    <option value="{{$pembiayaan->id}}">
+                                        {{$pembiayaan->kode_akun.'.'.$pembiayaan->kode_kelompok.'.'.$pembiayaan->kode.' '.$pembiayaan->nama_jenis}}
                                     </option>
                                 @endforeach
                             </select>
                             <div class="invalid-feedback" id="rekening_feedback">
                                 Please provide a valid city.
                             </div>
+                            <span class="text-danger mt-1" id="pembiayaanWarning" style="display: none"><small>Nilai pembiayaan tidak mencukupi.</small></span>
                         </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Batal</button>
@@ -375,7 +426,81 @@
         </div>
     </div>
 
-    {{--        Modal upadte nominal--}}
+    <!-- Modal Pembiayaan -->
+    <div class="modal fade" id="modalItemPembiayaan" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="modalItemPembiayaan" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h5 class="modal-title" id="modalFormItemPembiayaan">Form Tanggal Kertas Kerja</h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="#" id="formItemPembiayaan">
+                    <div class="modal-body">
+                        @csrf
+                        <input type="hidden" id="pembiayaanTanggalId" name="sd_tanggal_id">
+                        <div class="form-group">
+                            <label for="tanggal"><span class="text-danger">*</span>OPD</label>
+                            <select name="unit_id" id="opdPembiayaan" class="form-control" style="width: 100%;">
+                                @foreach($opds as $opd)
+                                    <option value="{{$opd->id}}">
+                                        {{$opd->bidang->urusan->kode.'.'.$opd->bidang->kode.'.'.$opd->kode.' '.$opd->nama_unit}}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback" id="opd_feedback">
+                                Please provide a valid city.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="rekening"><span class="text-danger">*</span>Rekening</label>
+                            <select name="jenis_id" id="rekeningPembiayaan" class="form-control" style="width: 100%;">
+
+                                @foreach($rekPembiayaans as $pembiayaan)
+                                    <option value="{{$pembiayaan->id}}">
+                                        {{$pembiayaan->kode_akun.'.'.$pembiayaan->kode_kelompok.'.'.$pembiayaan->kode.' '.$pembiayaan->nama_jenis}}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback" id="rekening_feedback">
+                                Please provide a valid city.
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="uraian"><span class="text-danger">*</span>Uraian</label>
+                            <textarea name="uraian" id="uraianPembiayaan" rows="2" class="form-control"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nilaiPembiayaan"><span class="text-danger">*</span>Nilai</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">RP.</span>
+                                </div>
+                                <input type="text" class="form-control format-nilai" autofocus name="nilai"
+                                       id="nilaiPembiayaan" data-a-dec="," data-a-sep=".">
+                            </div>
+                            {{--                            <div class="invalid-feedback" id="nilai_feedback">--}}
+                            {{--                                Please provide a valid city.--}}
+                            {{--                            </div>--}}
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanItemPembiayaan">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal upadte nominal--}}
     <div class="modal fade" id="modalNominal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="modalNominal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm" role="document">

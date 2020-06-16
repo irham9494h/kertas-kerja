@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\KertasKerja;
+use App\Models\KertasKerjaPembiayaan;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CreateBelanjaResource extends JsonResource
+class PemniayaanResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -22,7 +24,18 @@ class CreateBelanjaResource extends JsonResource
             'nama_jenis' => $this->jenis->nama_jenis,
             'uraian' => $this->uraian,
             'nilai' => $this->nilai,
-//            'sumber_dana_pendapatan' => $this->kertas_kerja_pendapatan->jenis->nama_jenis
+            'list_uraian' => $this->uraianPembiayaan($this->sd_tanggal_id, $this->unit_id)
         ];
+    }
+
+    public function uraianPembiayaan($tgl_id, $unit_id)
+    {
+        $pembiayaan = KertasKerjaPembiayaan::with('jenis')
+            ->where('unit_id', '=', $unit_id)
+            ->where('sd_tanggal_id', '=', $tgl_id)
+            ->get();
+
+        return $pembiayaan;
+//        return UraianPendapatanResource::collection($pendapatan);
     }
 }

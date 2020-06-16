@@ -22,7 +22,14 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Rekening</h3>
+{{--                        <h3>Rekening</h3>--}}
+{{--                        <div class="card-tools">--}}
+{{--                            <span>tahun</span>--}}
+{{--                        </div>--}}
+                        <div class="d-flex justify-content-between">
+                            <h3>Rekening</h3>
+                            <h4><span class="badge badge-info">Rekening tahun {{$tahun->tahun}}</span></h4>
+                        </div>
                     </div>
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="custom-content-above-tab" role="tablist">

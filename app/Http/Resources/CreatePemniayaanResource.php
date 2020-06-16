@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CreateBelanjaResource extends JsonResource
+class CreatePemniayaanResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -21,8 +21,7 @@ class CreateBelanjaResource extends JsonResource
             'jenis_id' => $this->jenis_id,
             'nama_jenis' => $this->jenis->nama_jenis,
             'uraian' => $this->uraian,
-            'nilai' => $this->nilai,
-//            'sumber_dana_pendapatan' => $this->kertas_kerja_pendapatan->jenis->nama_jenis
+            'nilai' => $this->nilai
         ];
     }
 }
