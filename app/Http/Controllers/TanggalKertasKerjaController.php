@@ -7,6 +7,7 @@ use App\Http\Resources\CreatePendapatanResource;
 use App\Http\Resources\PendapatanResource;
 use App\Models\KertasKerja;
 use App\Models\KertasKerjaBelanja;
+use App\Models\KertasKerjaPembiayaan;
 use App\Models\OrganisasiUnit;
 use App\Models\TahunSumberDana;
 use App\Models\TanggalSumberDana;
@@ -42,6 +43,9 @@ class TanggalKertasKerjaController extends AppController
                 $belanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $latestDate->id)
                     ->get();
 
+                $pembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $latestDate->id)
+                    ->get();
+
                 if (count($items) > 0) {
                     $data = [];
 
@@ -69,9 +73,22 @@ class TanggalKertasKerjaController extends AppController
                             'jenis_id' => $item->jenis_id,
                             'uraian' => $item->uraian,
                             'nilai' => $item->nilai,
-                            'pendapatan_id' => $item->pendapatan_id
+                            'pendapatan_id' => $item->pendapatan_id,
+                            'pembiayaan_id' => $item->pembiayaan_id,
+                            'nilai_pembiayaan' => $item->nilai_pembiayaan,
                         ];
                         $kertasKerja = KertasKerjaBelanja::create($data);
+                    }
+
+                    foreach ($pembiayaan as $item) {
+                        $data = [
+                            'sd_tanggal_id' => $tanggal->id,
+                            'unit_id' => $item->unit_id,
+                            'jenis_id' => $item->jenis_id,
+                            'uraian' => $item->uraian,
+                            'nilai' => $item->nilai,
+                        ];
+                        $kertasKerja = KertasKerjaPembiayaan::create($data);
                     }
 
                     return $this->createdResponse($tanggal);
