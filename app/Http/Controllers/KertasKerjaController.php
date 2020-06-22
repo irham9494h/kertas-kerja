@@ -161,7 +161,7 @@ class KertasKerjaController extends AppController
         $totalSumberDana = KertasKerja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
             ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
         if ($pendapatan)
-//            return $this->createdResponse($request->all(), $totalSumberDana);
+
             return $this->createdResponse(new CreatePendapatanResource($pendapatan), $totalSumberDana);
 
         return $this->storeFailedResponse();
@@ -238,10 +238,9 @@ class KertasKerjaController extends AppController
         if ($validator->fails()) {
             return response()->json(['status' => false, 'error' => $validator->errors()]);
         }
-        return response()->json($request->all());
 
         if ($request->has('pembiayaan_checkbox')) {
-            $nilai_pembiayaan = $request->nilai - $request->total_pendapatan;
+            $nilai_pembiayaan = $request->nilai_belanja - $request->total_pendapatan;
             $data = [
                 'jenis_id' => $request->jenis_id,
                 'nilai' => $request->nilai_belanja,
@@ -293,14 +292,53 @@ class KertasKerjaController extends AppController
     public function updateNominalBelanja(Request $request)
     {
         $itemKertasKerja = KertasKerjaBelanja::findOrFail($request->uraian_id);
+
+        $selisihNilai = 0;
+        $selisihNilaiSetelahDikurangiPembiayaan = 0;
+
+        if (floatval($request->new_nominal) > $itemKertasKerja->nilai) {
+            //nilai baru lebih besar
+            $selisihNilai = floatval($request->new_nominal) - $itemKertasKerja->nilai;
+
+            //jikan nilai lebih besar dari total pendapatan, maka tambahkan dari pembiayaan
+            if ($selisihNilai > $request->total_pendapatan) {
+                $itemKertasKerja->nilai_pembiayaan = floatval($itemKertasKerja->nilai_pembiayaan + $selisihNilai);
+                $itemKertasKerja->nilai_pembiayaan = $itemKertasKerja->nilai_pembiayaan - floatval($request->total_pendapatan);
+            }
+
+            $itemKertasKerja->pembiayaan_id = $request->pembiayaan_id;
+
+        } else if (floatval($request->new_nominal) < $itemKertasKerja->nilai) {
+            //nilai baru lebih kecil
+            $selisihNilai = $itemKertasKerja->nilai - floatval($request->new_nominal);
+
+            if ($itemKertasKerja->pembiayaan_id != '') {
+                if ($selisihNilai < $itemKertasKerja->nilai_pembiayaan) {
+                    $itemKertasKerja->nilai_pembiayaan = $itemKertasKerja->nilai_pembiayaan - $selisihNilai;
+                } else if ($selisihNilai > $itemKertasKerja->nilai_pembiayaan) {
+                    $selisihNilaiSetelahDikurangiPembiayaan = $selisihNilai - $itemKertasKerja->nilai_pembiayaan;
+                    $itemKertasKerja->nilai_pembiayaan = 0;
+                }
+            }
+        }
+
+        //simpan nilai baru belanja
         $itemKertasKerja->nilai = $request->new_nominal;
         $itemKertasKerja->save();
 
         $totalBelanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
-        $totalSumberDana = KertasKerja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
-            ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
-        $totalSumberDana = $totalSumberDana - $totalBelanja;
-        $totalPembiayaan = $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
+
+        $totalBelanjaPembiayaan = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai_pembiayaan');
+        $pendapatan = KertasKerja::where('jenis_item', '=', 'pendapatan')->where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+            ->sum('nilai');
+        $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
+
+        if ($totalBelanja > $pendapatan) {
+            $totalSumberDana = 0;
+            $totalPembiayaan = $totalPembiayaan - $totalBelanjaPembiayaan;
+        } else {
+            $totalSumberDana = $pendapatan - $totalBelanja;
+        }
 
         if ($itemKertasKerja)
             return response()->json([

@@ -142,5 +142,5 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/sb-tahun.js')}}"></script>
+    <script src="{{asset('app/sb-tahun.min.js')}}"></script>
 @endsection

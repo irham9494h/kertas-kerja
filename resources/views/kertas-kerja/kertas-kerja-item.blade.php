@@ -371,7 +371,8 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">RP.</span>
                                         </div>
-                                        <input type="text" class="form-control format-nilai" autofocus name="nilai_belanja"
+                                        <input type="text" class="form-control format-nilai" autofocus
+                                               name="nilai_belanja"
                                                id="nilaiBelanja" data-a-dec="," data-a-sep=".">
                                     </div>
                                     <div class="invalid-feedback" id="nilai_belanja_feedback">
@@ -415,9 +416,6 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <div class="invalid-feedback" id="rekening_feedback">
-                                Please provide a valid city.
-                            </div>
                             <span class="text-danger mt-1" id="pembiayaanWarning" style="display: none"><small>Nilai pembiayaan tidak mencukupi.</small></span>
                         </div>
 
@@ -511,7 +509,7 @@
     {{-- Modal upadte nominal--}}
     <div class="modal fade" id="modalNominal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="modalNominal" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-danger">
                     <h5 class="modal-title" id="modalFormItemBelanja">Form Ubah Nominal</h5>
@@ -524,6 +522,8 @@
                         @csrf
                         <input type="hidden" id="kertasKerjaId" name="kertas_kerja_id">
                         <input type="hidden" id="updateNominalTanggalId" name="sd_tanggal_id">
+                        <input type="hidden" id="updateNominalTotalPendapatan" name="total_pendapatan">
+                        <input type="hidden" id="updateNominalTotalPembiayaan" name="total_pembiayaan">
                         <div class="form-group">
                             <label for="newNominal"><span class="text-danger">*</span>Nominal</label>
                             <div class="input-group mb-3">
@@ -532,10 +532,31 @@
                                 </div>
                                 <input type="text" class="form-control" autofocus name="new_nominal"
                                        id="newNominal">
+                                <input type="hidden" class="form-control" autofocus name="nilai_pembiayaan"
+                                       id="updateNominalNilaiPembiayaan">
+                                <input type="hidden" class="form-control" autofocus name="pembiayaan_id"
+                                       id="updateNominalIdPembiayaan">
                             </div>
-                            <div class="invalid-feedback" id="new_nominal_feedback">
-                                Please provide a valid city.
-                            </div>
+                            <span class="text-danger mt-1" id="updateModalNilaiWarning" style="display: none"><small>Nilai yang dimasukan melebihi pendapatan.</small></span>
+                        </div>
+
+                        <div class="form-check" id="updateModalGunakanPembiayaan" style="display: none">
+                            <input type="checkbox" class="form-check-input" id="UpdateModalpembiayaanCheckbox"
+                                   name="pembiayaan_checkbox" value="1" disabled>
+                            <label class="form-check-label" for="UpdateModalpembiayaanCheckbox"><strong>Gunakan Pembiayaan</strong></label>
+                        </div>
+
+                        <div class="form-group" id="updateModalBelanjaPembiayaan" style="display:none;">
+                            <select name="pembiayaan_id" id="updateModalRekeningBelanjaPembiayaan" class="form-control"
+                                    style="width: 100%;" disabled>
+
+                                @foreach($rekPembiayaans as $pembiayaan)
+                                    <option value="{{$pembiayaan->id}}">
+                                        {{$pembiayaan->kode_akun.'.'.$pembiayaan->kode_kelompok.'.'.$pembiayaan->kode.' '.$pembiayaan->nama_jenis}}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <span class="text-danger mt-1" id="updateModalPembiayaanWarning" style="display: none"><small>Nilai pembiayaan tidak mencukupi.</small></span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -580,7 +601,7 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/sb.js')}}"></script>
+    <script src="{{asset('app/sb.min.js')}}"></script>
     <script>
         $(function () {
             fetchKertasKerja('{{$tanggal_id}}')

@@ -69,6 +69,7 @@ $(function () {
     $('#opdPembiayaan').select2();
     $('#rekeningPembiayaan').select2();
     $('#rekeningBelanjaPembiayaan').select2();
+    $('#updateModalRekeningBelanjaPembiayaan').select2();
 
     $.ajaxSetup({
         headers: {
@@ -138,7 +139,7 @@ $(function () {
             dataType: 'json',
             data: $('#formTanggal').serialize(),
             success: function (data) {
-                console.log(data)
+                // console.log(data)
                 if (data.status) {
                     $('#btnDeleteTanggal').remove();
                     html = '';
@@ -267,7 +268,7 @@ function fetchKertasKerja(tanggalId) {
         url: pendapatanUrl + tanggalId + '/list/json',
         dataType: 'json',
         success: function (data) {
-            console.log(data)
+            // console.log(data)
             $('#itemKertasKerjaLoader').html('');
             var html = '';
             var opd = '';
@@ -334,7 +335,7 @@ $('#btnSimpanItemPendapatan').on('click', function (e) {
         data: $('#formItemPendapatan').serialize(),
         success: function (data) {
             var html = '';
-            console.log(data)
+            // console.log(data)
             if (data.status) {
                 if ($('#pendapatanContentTable').children().length > 0) {
                     if ($('#opd' + data.data.unit_id).children().length > 0) {
@@ -387,44 +388,236 @@ function editItem(id, nominal, e) {
     activeTab = 'pendapatan';
     $('#kertasKerjaId').val(id);
     $('#updateNominalTanggalId').val(tanggalIDKertasKerja);
+    $('#updateNominalTotalPendapatan').val('').hide();
+    $('#updateNominalTotalPembiayaan').val('').hide();
+    $('#updateModalGunakanPembiayaan').hide();
+    $('#updateModalBelanjaPembiayaan').hide();
+    $('#updateNominalNilaiPembiayaan').val('').hide();
+    $('#updateNominalIdPembiayaan').val('').hide();
+
+    $('#btnSimpanUbahNominal').show();
+
     newNominal.set(nominal);
     oldNominal = nominal;
     $('#modalNominal').modal('show')
 }
 
-function editItemBelanja(id, nominal, e) {
+function editItemBelanja(id, nominal, pembiayaan_id, nilai_pembiayaan, e) {
     e.preventDefault();
+
     activeTab = 'belanja';
     $('#kertasKerjaId').val(id);
     $('#updateNominalTanggalId').val(tanggalIDKertasKerja);
+    $('#updateNominalTotalPendapatan').show().val(totalPendapatan);
+    $('#updateNominalTotalPembiayaan').show().val(totalPembiayaan);
+    $('#updateModalGunakanPembiayaan').show();
+    $('#updateModalBelanjaPembiayaan').show();
+    $('#updateNominalNilaiPembiayaan').show().val(nilai_pembiayaan);
+    $('#updateNominalIdPembiayaan').show().val(pembiayaan_id);
+
+    $('#btnSimpanUbahNominal').show();
+    $('#updateModalNilaiWarning').hide();
+    $('#updateModalPembiayaanWarning').hide();
+
+    $('#updateModalRekeningBelanjaPembiayaan').val(pembiayaan_id).trigger('change');
+
+    if (pembiayaan_id !== null) {
+        // console.log(pembiayaan_id + '------centang')
+        $('#UpdateModalpembiayaanCheckbox').removeAttr('disabled').attr('checked', true);
+        $('#updateModalRekeningBelanjaPembiayaan').removeAttr('disabled');
+    } else {
+        // console.log(pembiayaan_id + '------tidak di centang')
+        $('#UpdateModalpembiayaanCheckbox').removeAttr('checked').attr('disabled', true);
+        $('#updateModalRekeningBelanjaPembiayaan').prop('disabled', true);
+    }
+
     newNominal.set(nominal);
     oldNominal = nominal;
     $('#modalNominal').modal('show')
 }
+
+function editItemPembiayaan(id, nominal, e) {
+    e.preventDefault();
+    activeTab = 'pembiayaan';
+    $('#kertasKerjaId').val(id);
+    $('#updateNominalTanggalId').val(tanggalIDKertasKerja);
+    $('#updateNominalTotalPendapatan').val('').hide();
+    $('#updateNominalTotalPembiayaan').val('').hide();
+    $('#updateModalGunakanPembiayaan').hide();
+    $('#updateModalBelanjaPembiayaan').hide();
+    $('#updateNominalNilaiPembiayaan').val('').hide();
+    $('#updateNominalIdPembiayaan').val('').hide();
+
+    $('#btnSimpanUbahNominal').show();
+
+    newNominal.set(nominal);
+    oldNominal = nominal;
+    $('#modalNominal').modal('show')
+}
+
+$('#newNominal').keyup(function () {
+    var nilaiBaru = $('#newNominal').val();
+    var nilaiLama = oldNominal;
+
+    nilaiBaru = nilaiBaru.replace(/\./g, "");
+    nilaiBaru = nilaiBaru.replace(/\,/g, ".");
+
+    if (activeTab === 'belanja') {
+        var pembiayaan_id = $('#updateNominalIdPembiayaan').val();
+        var nilai_pembiayaan = $('#updateNominalNilaiPembiayaan').val();
+        var nilaiBelanjaTanpaPembiayaan = 0;
+        var selisihPendapatan = 0;
+        var selisihPembiayaan = 0;
+        var selisihNilai = 0;
+        var selisihNilaiBelanja = 0;
+
+        if (nilai_pembiayaan > nilaiLama) {
+            nilaiBelanjaTanpaPembiayaan = nilai_pembiayaan - nilaiLama;
+        } else {
+            nilaiBelanjaTanpaPembiayaan = nilaiLama - nilai_pembiayaan;
+        }
+
+        if (nilaiBaru > nilaiLama) {
+            // console.log('lebih besar')
+            selisihNilaiBelanja = nilaiBaru - nilaiLama;
+            if ($('#UpdateModalpembiayaanCheckbox').is(":checked")) {
+                // console.log('pembiayaan tercentang')
+                if (selisihNilaiBelanja > totalPendapatan) {
+                    if (selisihNilaiBelanja > totalPembiayaan) {
+                        $('#updateModalPembiayaanWarning').show();
+                        $('#btnSimpanUbahNominal').hide();
+                    } else {
+                        $('#updateModalPembiayaanWarning').hide();
+                        $('#btnSimpanUbahNominal').show();
+                    }
+                } else {
+                    $('#UpdateModalpembiayaanCheckbox').removeAttr('checked').attr('disabled', true);
+                    $('#updateModalRekeningBelanjaPembiayaan').attr('disabled', true);
+                    $('#updateModalRekeningBelanjaPembiayaan').val($('#updateModalRekeningBelanjaPembiayaan option:first-child').val()).trigger('change');
+
+                    $('#updateModalPembiayaanWarning').hide();
+                    $('#updateModalNilaiWarning').hide();
+                    $('#btnSimpanUbahNominal').show();
+                }
+            } else {
+                // console.log('pembiayaan tidak tercentang');
+                $('#updateModalRekeningBelanjaPembiayaan').attr("disabled", true);
+                // console.log('nilai lebih besar' + selisihNilaiBelanja)
+                if (selisihNilaiBelanja > totalPendapatan) {
+                    $('#updateModalNilaiWarning').show();
+
+                    if (selisihNilaiBelanja > totalPembiayaan) {
+                        $('#updateModalPembiayaanWarning').show();
+                        $('#btnSimpanUbahNominal').hide();
+                    } else {
+                        $('#updateModalPembiayaanWarning').hide();
+                        $('#btnSimpanUbahNominal').show();
+
+                        $('#UpdateModalpembiayaanCheckbox').removeAttr('disabled').attr('checked', true);
+                        $('#updateModalRekeningBelanjaPembiayaan').removeAttr('disabled');
+                        $('#updateModalRekeningBelanjaPembiayaan').val( $('#updateModalRekeningBelanjaPembiayaan option:first-child').val()).trigger('change');
+
+                    }
+                } else {
+                    $('#updateModalNilaiWarning').hide();
+                    $('#btnSimpanUbahNominal').show();
+                }
+            }
+        } else {
+            // console.log('tidak lebih besar')
+            selisihNilaiBelanja = nilaiLama - nilaiBaru;
+
+            $('#updateModalNilaiWarning').hide();
+            $('#updateModalPembiayaanWarning').hide();
+            $('#btnSimpanUbahNominal').show();
+
+            if (pembiayaan_id == "") {
+                $('#UpdateModalpembiayaanCheckbox').removeAttr('checked').attr('disabled', true);
+                $('#updateModalRekeningBelanjaPembiayaan').attr('disabled', true);
+            }
+
+        }
+    }
+
+});
+
+$('#UpdateModalpembiayaanCheckbox').on('click', function () {
+    var nilaiBaru = $('#newNominal').val();
+    var nilai_pembiayaan = $('#updateNominalNilaiPembiayaan').val();
+    var nilaiLama = oldNominal;
+    nilaiBaru = nilaiBaru.replace(/\./g, "");
+    nilaiBaru = nilaiBaru.replace(/\,/g, ".");
+
+    var selisih = nilaiBaru - nilaiLama;
+
+    if ($(this).is(":checked")) {
+        $('#updateModalNilaiWarning').hide();
+        if (selisih > totalPembiayaan) {
+            $('#btnSimpanUbahNominal').hide();
+            $('#updateModalPembiayaanWarning').show();
+        } else {
+            $('#btnSimpanUbahNominal').show();
+            $('#updateModalPembiayaanWarning').hide();
+        }
+        $('#updateModalRekeningBelanjaPembiayaan').removeAttr("disabled");
+    } else {
+        if (nilaiBaru > totalPendapatan) {
+            $('#btnSimpanUbahNominal').hide();
+            $('#updateModalRekeningBelanjaPembiayaan').attr("disabled", true);
+            $('#updateModalNilaiWarning').show();
+        } else {
+            $('#updateModalNilaiWarning').hide();
+            $('#btnSimpanUbahNominal').show();
+        }
+    }
+});
 
 $('#btnSimpanUbahNominal').on('click', function (e) {
     e.preventDefault();
     newNominal.unformat()
     var nominal = $('#newNominal').val()
     var updateUrl = '';
+    var data = '';
     if (activeTab === 'pendapatan') {
         updateUrl = 'update-nominal';
+        data = {
+            'new_nominal': nominal,
+            'uraian_id': $('#kertasKerjaId').val(),
+            'sd_tanggal_id': $('#updateNominalTanggalId').val()
+        }
     } else if (activeTab === 'belanja') {
         updateUrl = 'update-nominal-belanja';
+        var checkbox = null;
+        var pembiayaanId = null;
+        if (!$('#UpdateModalpembiayaanCheckbox').is(":disabled")) {
+            checkbox = $('#UpdateModalpembiayaanCheckbox').val();
+            pembiayaanId = $('#updateModalRekeningBelanjaPembiayaan').val();
+        }
+
+        data = {
+            'new_nominal': nominal,
+            'uraian_id': $('#kertasKerjaId').val(),
+            'sd_tanggal_id': $('#updateNominalTanggalId').val(),
+            'total_pendapatan': $('#updateNominalTotalPendapatan').val(),
+            'total_pembiayaan': $('#updateNominalTotalPembiayaan').val(),
+            'pembiayaan_checkbox' : checkbox,
+            'pembiayaan_id' : pembiayaanId,
+        }
     } else if (activeTab === 'pembiayaan') {
         updateUrl = 'update-nominal-pembiayaan';
+        data = {
+            'new_nominal': nominal,
+            'uraian_id': $('#kertasKerjaId').val(),
+            'sd_tanggal_id': $('#updateNominalTanggalId').val()
+        }
     }
     $.ajax({
         type: 'POST',
         url: sbUrl + updateUrl,
         dataType: 'json',
-        data: {
-            'new_nominal': nominal,
-            'uraian_id': $('#kertasKerjaId').val(),
-            'sd_tanggal_id': $('#updateNominalTanggalId').val()
-        },
+        data: data,
         success: function (data) {
-            console.log(data)
+            // console.log(data)
             var oldTotal = 0;
             var selisih = 0;
             if (data.status) {
@@ -439,11 +632,11 @@ $('#btnSimpanUbahNominal').on('click', function (e) {
                     oldTotal = tot.getNumber();
                     if (oldNominal > data.data.nilai) {
                         selisih = oldNominal - nominal;
-                        console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
+                        // console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
                         $('#totalNilai' + data.data.unit_id).html(formatRupiah(oldTotal - selisih)).attr('data-total', oldTotal - selisih);
                     } else if (oldNominal < nominal) {
                         selisih = data.data.nilai - oldNominal;
-                        console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
+                        // console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
                         $('#totalNilai' + data.data.unit_id).html(formatRupiah(oldTotal + selisih)).attr('data-total', oldTotal + selisih);
                     }
 
@@ -458,22 +651,25 @@ $('#btnSimpanUbahNominal').on('click', function (e) {
                         decimalCharacterAlternative: '.',
                     });
                     oldTotal = tBelanja.getNumber();
-                    // console.log(data.data.unit_id)
-                    // console.log($('#totalNilaiBelanja' + data.data.unit_id).text())
+
                     if (oldNominal > data.data.nilai) {
                         selisih = oldNominal - nominal;
-                        console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
+                        // console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
                         $('#totalNilaiBelanja' + data.data.unit_id).html(formatRupiah(oldTotal - selisih)).attr('data-total', oldTotal - selisih);
                     } else if (oldNominal < nominal) {
                         selisih = data.data.nilai - oldNominal;
-                        console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
+                        // console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
                         $('#totalNilaiBelanja' + data.data.unit_id).html(formatRupiah(oldTotal + selisih)).attr('data-total', oldTotal + selisih);
                     }
 
-                    $('#itemBelanja' + data.data.id).attr('onclick', 'editItemBelanja(' + data.data.id + ', ' + nominal + ', event)')
+                    $('#itemBelanja' + data.data.id).attr('onclick', 'editItemBelanja(' + data.data.id + ', ' + nominal + ', ' + data.data.pembiayaan_id + ', ' + data.data.nilai_pembiayaan + ', event)')
                         .text(formatRupiah(nominal));
-                    $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
+
+                    $('#totalSumberDana').text(formatRupiah(data.totalSumberDana)).show();
                     totalPendapatan = data.totalSumberDana;
+                    $('#totalPembiayaan').text(formatRupiah(data.totalPembiayaan)).show();
+                    totalPembiayaan = data.totalPembiayaan;
+
                     $('#totalBelanja').text(formatRupiah(data.totalBelanja));
                     totalBelanja = data.totalBelanja;
                 } else if (activeTab === 'pembiayaan') {
@@ -485,11 +681,11 @@ $('#btnSimpanUbahNominal').on('click', function (e) {
                     oldTotal = tPembiayaan.getNumber();
                     if (oldNominal > data.data.nilai) {
                         selisih = oldNominal - nominal;
-                        console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
+                        // console.log('> ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal - selisih));
                         $('#totalNilaiPembiayaan' + data.data.unit_id).html(formatRupiah(oldTotal - selisih)).attr('data-total', oldTotal - selisih);
                     } else if (oldNominal < nominal) {
                         selisih = data.data.nilai - oldNominal;
-                        console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
+                        // console.log('< ' + oldNominal + ', ' + nominal + ', ' + selisih + ', ' + oldTotal + ', ' + (oldTotal + selisih));
                         $('#totalNilaiPembiayaan' + data.data.unit_id).html(formatRupiah(oldTotal + selisih)).attr('data-total', oldTotal + selisih);
                     }
 
@@ -499,7 +695,7 @@ $('#btnSimpanUbahNominal').on('click', function (e) {
                     totalPembiayaan = data.totalPembiayaan;
                 }
             } else {
-                errorSwal(data.message);
+                errorSwal('Gagal mengubah nominal.');
             }
         },
         error: function (xhr) {
@@ -549,7 +745,7 @@ function fetchKertasKerjaBelanja(tanggalId) {
             var html = '';
             var opd = '';
             var total = 0;
-            console.log(data)
+            // console.log(data)
             if (data.data.length > 0) {
                 opd = '';
                 for (i = 0; i < data.opd.length; i++) {
@@ -576,7 +772,11 @@ function fetchKertasKerjaBelanja(tanggalId) {
                     for (j = 0; j < data.data[i].list_uraian.length; j++) {
                         html += '<tr>';
                         html += '<td style="width: 80%">' + data.data[i].list_uraian[j].uraian + '</td>';
-                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="itemBelanja' + data.data[i].list_uraian[j].id + '" onclick="editItemBelanja(' + data.data[i].list_uraian[j].id + ',' + data.data[i].list_uraian[j].nilai + ', event)">' + formatRupiah(data.data[i].list_uraian[j].nilai) + '</a></td>';
+                        if (data.data[i].list_uraian[j].pembiayaan_id == null) {
+                            html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="itemBelanja' + data.data[i].list_uraian[j].id + '" onclick="editItemBelanja(' + data.data[i].list_uraian[j].id + ',' + data.data[i].list_uraian[j].nilai + ',' + data.data[i].list_uraian[j].pembiayaan_id + ',' + data.data[i].list_uraian[j].nilai_pembiayaan + ', event)">' + formatRupiah(data.data[i].list_uraian[j].nilai) + '</a></td>';
+                        } else {
+                            html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="itemBelanja' + data.data[i].list_uraian[j].id + '" onclick="editItemBelanja(' + data.data[i].list_uraian[j].id + ',' + data.data[i].list_uraian[j].nilai + ',' + data.data[i].list_uraian[j].pembiayaan_id + ',' + data.data[i].list_uraian[j].nilai_pembiayaan + ', event)"><span class="text-warning">' + formatRupiah(data.data[i].list_uraian[j].nilai) + '</span></a></td>';
+                        }
                         html += '</tr>';
                         total += data.data[i].list_uraian[j].nilai;
                     }
@@ -615,24 +815,22 @@ $('#nilaiBelanja').keyup(function () {
     nilai = nilai.replace(/\,/g, ".");
     var selisih = nilai - totalPendapatan;
 
-    if (nilai === "") {
-        // $('#rekeningBelanjaPembiayaan').attr("disabled", true);
-        // $('#btnSimpanItemBelanja').hide();
-    } else {
-        // $('#rekeningBelanjaPembiayaan').removeAttr("disabled");
-        // $('#btnSimpanItemBelanja').show();
-
-    }
-
     if (nilai > totalPendapatan) {
         $('#nilaiWarning').show();
         $('#btnSimpanItemBelanja').hide();
         $('#pembiayaanCheckbox').removeAttr("disabled");
 
-        if (selisih > totalPembiayaan) {
-            $('#pembiayaanWarning').show();
+        if ($('#pembiayaanCheckbox').is(":checked")) {
+            if (selisih > totalPembiayaan) {
+                $('#pembiayaanWarning').show();
+            } else {
+                $('#pembiayaanWarning').hide();
+                $('#btnSimpanItemBelanja').show();
+            }
+            $('#rekeningBelanjaPembiayaan').removeAttr("disabled");
         } else {
-            $('#pembiayaanWarning').hide();
+            $('#btnSimpanItemBelanja').hide();
+            $('#rekeningBelanjaPembiayaan').attr("disabled", true);
         }
     } else {
         $('#nilaiWarning').hide();
@@ -649,16 +847,18 @@ $('#pembiayaanCheckbox').on('click', function () {
 
     var selisih = nilai - totalPendapatan;
 
-    if (selisih > totalPembiayaan) {
-        $('#btnSimpanItemBelanja').hide();
-    } else {
-        $('#btnSimpanItemBelanja').show();
-    }
-
     if ($(this).is(":checked")) {
-        $('#belanjaPembiayaan').show();
+        if (selisih > totalPembiayaan) {
+            $('#btnSimpanItemBelanja').hide();
+            $('#pembiayaanWarning').show();
+        } else {
+            $('#btnSimpanItemBelanja').show();
+            $('#pembiayaanWarning').hide();
+        }
+        $('#rekeningBelanjaPembiayaan').removeAttr("disabled");
     } else {
-        $('#belanjaPembiayaan').hide();
+        $('#btnSimpanItemBelanja').hide();
+        $('#rekeningBelanjaPembiayaan').attr("disabled", true);
     }
 });
 
@@ -673,30 +873,26 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
         dataType: 'json',
         data: $('#formItemBelanja').serialize(),
         success: function (data) {
-            console.log(data)
             var html = '';
-            $('#totalSumberDana').text(formatRupiah(data.totalSumberDana)).show();
-            totalPendapatan = data.totalSumberDana;
-            $('#totalBelanja').text(formatRupiah(data.totalBelanja)).show();
-            totalBelanja = data.totalBelanja;
-            $('#totalPembiayaan').text(formatRupiah(data.totalPembiayaan)).show();
-            totalPembiayaan = data.totalPembiayaan;
             $('#itemKertasKerjaBelanjaLoader').html('');
             if (data.status) {
+                $('#totalSumberDana').text(formatRupiah(data.totalSumberDana)).show();
+                totalPendapatan = data.totalSumberDana;
+                $('#totalBelanja').text(formatRupiah(data.totalBelanja)).show();
+                totalBelanja = data.totalBelanja;
+                $('#totalPembiayaan').text(formatRupiah(data.totalPembiayaan)).show();
+                totalPembiayaan = data.totalPembiayaan;
+
                 if ($('#belanjaContentTable').children().length > 0) {
                     if ($('#opdBelanja' + data.data.unit_id).children().length > 0) {
                         html = '';
                         html += '<tr>';
                         html += '<td style="width: 80%">' + data.data.uraian + '</td>';
-                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" onclick="editItemBelanja(' + data.data.id + ', ' + data.data.nilai + ', event)">' + formatRupiah(data.data.nilai) + '</a></td>';
+                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" onclick="editItemBelanja(' + data.data.id + ', ' + data.data.nilai + ',' + data.data.pembiayaan_id + ',' + data.data.nilai_pembiayaan + ',  event)">' + formatRupiah(data.data.nilai) + '</a></td>';
                         html += '</tr>';
                         $('#tblOpdBelanja' + data.data.unit_id).append(html);
                         newTotal = parseInt($('#totalNilaiBelanja' + data.data.unit_id).data('total' + data.data.unit_id)) + parseInt(data.data.nilai);
                         $('#totalNilaiBelanja' + data.data.unit_id).html(formatRupiah(newTotal)).attr('data-total' + data.data.unit_id, newTotal);
-                        // $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
-                        // totalPendapatan = data.totalSumberDana;
-                        // $('#totalBelanja').text(formatRupiah(data.totalBelanja));
-                        // totalBelanja = data.totalBelanja;
                     } else {
                         html = '';
                         html += '<table class="w-100 table table-sm mb-0">';
@@ -709,16 +905,12 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
                         html += '<tbody id="tblOpdBelanja' + data.data.unit_id + '">';
                         html += '<tr>';
                         html += '<td style="width: 80%">' + data.data.uraian + '</td>';
-                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="itemBelanja' + data.data.id + '" onclick="editItemBelanja(' + data.data.id + ', ' + data.data.nilai + ', event)">' + formatRupiah(data.data.nilai) + '</a></td>';
+                        html += '<td style="text-align: end; width: 20%; padding-right: 0.5rem !important;"><a href="#" class="text-dark nominal" id="itemBelanja' + data.data.id + '" onclick="editItemBelanja(' + data.data.id + ', ' + data.data.nilai + ',' + data.data.pembiayaan_id + ', ' + data.data.nilai_pembiayaan + ',event)">' + formatRupiah(data.data.nilai) + '</a></td>';
                         html += '</tr>';
                         html += '</tbody>';
                         html += '</table>';
                         $('#opdBelanja' + data.data.unit_id).html(html);
                         $('#totalNilaiBelanja' + data.data.unit_id).html('Rp. ' + formatRupiah(data.data.nilai)).attr('data-total' + data.data.unit_id, data.data.nilai);
-                        // $('#totalSumberDana').text(formatRupiah(data.totalSumberDana));
-                        //      totalPendapatan = data.totalSumberDana;
-                        // $('#totalBelanja').text(formatRupiah(data.totalBelanja));
-                        // totalBelanja = data.totalBelanja;
                     }
                     $('#modalItemBelanjan').modal('hide');
                 } else {
@@ -726,7 +918,7 @@ $('#btnSimpanItemBelanja').on('click', function (e) {
                 }
                 $('#modalItemBelanjan').modal('hide');
                 successSwal('Berhsail')
-            }else {
+            } else {
                 errorSwal('Terdapat inputan yang masih kosong.')
                 // showError(data.error, 'formItemBelanja');
             }
@@ -771,7 +963,7 @@ function fetchKertasKerjaPembiayaan(tanggalId) {
             var html = '';
             var opd = '';
             var total = 0;
-            console.log(data)
+            // console.log(data)
             if (data.data.length > 0) {
                 opd = '';
                 for (i = 0; i < data.opd.length; i++) {
@@ -882,13 +1074,3 @@ $('#btnSimpanItemPembiayaan').on('click', function (e) {
         },
     });
 });
-
-function editItemPembiayaan(id, nominal, e) {
-    e.preventDefault();
-    activeTab = 'pembiayaan';
-    $('#kertasKerjaId').val(id);
-    $('#updateNominalTanggalId').val(tanggalIDKertasKerja);
-    newNominal.set(nominal);
-    oldNominal = nominal;
-    $('#modalNominal').modal('show')
-}

@@ -22,6 +22,8 @@ class CreateBelanjaResource extends JsonResource
             'nama_jenis' => $this->jenis->nama_jenis,
             'uraian' => $this->uraian,
             'nilai' => $this->nilai,
+            'nilai_pembiayaan' => $this->nilai_pembiayaan,
+            'pembiayaan_id' => $this->pembiayaan_id,
 //            'sumber_dana_pendapatan' => $this->kertas_kerja_pendapatan->jenis->nama_jenis
         ];
     }

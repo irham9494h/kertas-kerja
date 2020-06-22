@@ -174,5 +174,5 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/kertas-kerja.js')}}"></script>
+    <script src="{{asset('app/kertas-kerja.min.js')}}"></script>
 @endsection
