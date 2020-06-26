@@ -2,10 +2,12 @@ const akunUrl = window.location.origin + '/rekening/akun/';
 const kelompokUrl = window.location.origin + '/rekening/kelompok/';
 const jenisUrl = window.location.origin + '/rekening/jenis/';
 const objekUrl = window.location.origin + '/rekening/objek/';
+const rincianObjekUrl = window.location.origin + '/rekening/rincian-objek/';
 var user = {};
 var akun = {};
 var kelompok = {};
 var jenis = {};
+var objek = {};
 
 const confirmDelete = {
     title: 'Apakah Anda yakin?',
@@ -79,7 +81,7 @@ $(function () {
         $('#formKelompok').trigger('reset');
         $('#modalKelompok').modal('show');
         $('#akunId').val(akun.id);
-        $('#akunKelompok').val(akun.kode + '...' + akun.nama_akun);
+        $('#akunKelompok').val(akun.kode + '. ' + akun.nama_akun);
     });
 
     $('#btnSimpanKelompok').on('click', function (e) {
@@ -92,6 +94,9 @@ $(function () {
             data: $('#formKelompok').serialize(),
             success: function (data) {
                 if (data.status) {
+                    $('#tableKelompok').show();
+                    $('#noDataKelompok').hide();
+
                     html = '';
                     html = '<tr id="rowKelompok' + data.data.id + '"><td>' + akun.kode + '</td><td id="rowKodeKelompok' + data.data.id + '">' + data.data.kode + '</td><td><a href="#" id="rowNamaKelompok' + data.data.id + '" onclick="goToJenisTab(\'' + data.data.id + '\')">' + data.data.nama_kelompok + '</a></td>' +
                         '<td><button class="btn btn-xs btn-outline-warning" onclick="editKelompok(\'' + data.data.id + '\')" data-update-url="' + kelompokUrl + 'show/' + data.data.id + '" data-kelompok-id="' + data.data.id + '"><i class="fa fa-edit"></i></button> ' +
@@ -117,7 +122,7 @@ $(function () {
         $('#formJenis').trigger('reset');
         $('#modalJenis').modal('show');
         $('#kelompokId').val(kelompok.id);
-        $('#kelompokJenis').val(kelompok.kode + '...' + kelompok.nama_kelompok);
+        $('#kelompokJenis').val(akun.kode+'.'+kelompok.kode + '. ' + kelompok.nama_kelompok);
     });
 
     $('#btnSimpanJenis').on('click', function (e) {
@@ -130,6 +135,9 @@ $(function () {
             data: $('#formJenis').serialize(),
             success: function (data) {
                 if (data.status) {
+                    $('#tableJenis').show();
+                    $('#noDataJenis').hide();
+
                     html = '';
                     html = '<tr id="rowJenis' + data.data.id + '"><td>' + akun.kode + '</td><td>' + kelompok.kode + '</td><td id="rowKodeJenis' + data.data.id + '">' + data.data.kode + '</td><td><a href="#" id="rowNamaJenis' + data.data.id + '" onclick="goToObjekTab(\'' + data.data.id + '\')">' + data.data.nama_jenis + '</a></td>' +
                         '<td><button class="btn btn-xs btn-outline-warning" onclick="editJenis(\'' + data.data.id + '\')" data-update-url="' + jenisUrl + 'show/' + data.data.id + '" data-jenis-id="' + data.data.id + '"><i class="fa fa-edit"></i></button> ' +
@@ -155,7 +163,7 @@ $(function () {
         $('#formObjek').trigger('reset');
         $('#modalObjek').modal('show');
         $('#jenisId').val(jenis.id);
-        $('#jenisObjek').val(jenis.kode + '...' + jenis.nama_jenis);
+        $('#jenisObjek').val(akun.kode+'.'+kelompok.kode+'.'+jenis.kode + '. ' + jenis.nama_jenis);
     });
 
     $('#btnSimpanObjek').on('click', function (e) {
@@ -168,8 +176,11 @@ $(function () {
             data: $('#formObjek').serialize(),
             success: function (data) {
                 if (data.status) {
+                    $('#tableObjek').show();
+                    $('#noDataObjek').hide();
+
                     html = '';
-                    html = '<tr id="rowObjek' + data.data.id + '"><td>' + akun.kode + '</td><td>' + kelompok.kode + '</td><td>' + jenis.kode + '</td><td id="rowKodeObjek' + data.data.id + '">' + data.data.kode + '</td><td id="rowNamaObjek' + data.data.id + '">' + data.data.nama_obyek + '</td>' +
+                    html = '<tr id="rowObjek' + data.data.id + '"><td>' + akun.kode + '</td><td>' + kelompok.kode + '</td><td>' + jenis.kode + '</td><td id="rowKodeObjek' + data.data.id + '">' + data.data.kode + '</td><td><a href="#" id="rowNamaObjek' + data.data.id + '" onclick="goToRincianObjekTab(\'' + data.data.id + '\')">' + data.data.nama_obyek + '</a></td>' +
                         '<td><button class="btn btn-xs btn-outline-warning" onclick="editObjek(\'' + data.data.id + '\')" data-update-url="' + objekUrl + 'show/' + data.data.id + '" data-objek-id="' + data.data.id + '"><i class="fa fa-edit"></i></button> ' +
                         '<button class="btn btn-xs btn-outline-danger" id="btnDeleteObjek' + data.data.id + '" onclick="deleteObjek(' + data.data.id + ')" data-delete-url="' + objekUrl + 'delete/' + data.data.id + '" data-objek-id="' + data.data.id + '"><i class="fa fa-trash"></i></button></td></tr>';
                     $('#tableObjekBody').prepend(html);
@@ -177,6 +188,47 @@ $(function () {
                     $('#modalObjek').modal('hide');
                 } else {
                     showError(data.error, 'formObjek');
+                }
+            },
+        });
+    });
+
+    /**
+     * Rekening Rincian Objek
+     */
+    $('#btnTambahRincianObjek').on('click', function (e) {
+        e.preventDefault();
+        $('#modalFormRincianObjek').text('Form Tambah Rincian Objek');
+        $('#btnSimpanUbahRincianObjek').hide();
+        $('#btnSimpanRincianObjek').show();
+        $('#formRincianObjek').trigger('reset');
+        $('#modalRincianObjek').modal('show');
+        $('#obyekId').val(objek.id);
+        $('#objekRincianObjek').val(akun.kode + '.' + kelompok.kode + '.' + jenis.kode + '.' + objek.kode + '. ' + objek.nama_obyek);
+    });
+
+    $('#btnSimpanRincianObjek').on('click', function (e) {
+        e.preventDefault();
+        var html = '';
+        $.ajax({
+            type: 'POST',
+            url: rincianObjekUrl + 'store',
+            dataType: 'json',
+            data: $('#formRincianObjek').serialize(),
+            success: function (data) {
+                if (data.status) {
+                    $('#tableRincianObjek').show();
+                    $('#noDataRincianObjek').hide();
+
+                    html = '';
+                    html = '<tr id="rowRincianObjek' + data.data.id + '"><td>' + akun.kode + '</td><td>' + kelompok.kode + '</td><td>' + jenis.kode + '</td><td>' + objek.kode + '</td><td id="rowKodeRincianObjek' + data.data.id + '">' + data.data.kode + '</td><td id="rowNamaRincianObjek' + data.data.id + '">' + data.data.nama_rincian_obyek + '</td>' +
+                        '<td><button class="btn btn-xs btn-outline-warning" onclick="editRincianObjek(\'' + data.data.id + '\')" data-update-url="' + rincianObjekUrl + 'show/' + data.data.id + '" data-rincian-objek-id="' + data.data.id + '"><i class="fa fa-edit"></i></button> ' +
+                        '<button class="btn btn-xs btn-outline-danger" id="btnDeleteRincianObjek' + data.data.id + '" onclick="deleteRincianObjek(' + data.data.id + ')" data-delete-url="' + rincianObjekUrl + 'delete/' + data.data.id + '" data-rincian-objek-id="' + data.data.id + '"><i class="fa fa-trash"></i></button></td></tr>';
+                    $('#tableRincianObjekBody').prepend(html);
+                    successSwal('Berhasil menambah data rincian objek.');
+                    $('#modalRincianObjek').modal('hide');
+                } else {
+                    showError(data.error, 'formRincianObjek');
                 }
             },
         });
@@ -558,7 +610,7 @@ function getDataObjek(jenisId) {
                     html += '<td>' + kelompok.kode + '</td>';
                     html += '<td>' + jenis.kode + '</td>';
                     html += '<td id="rowKodeObjek' + data.data[i].id + '">' + data.data[i].kode + '</td>';
-                    html += '<td id="rowNamaObjek' + data.data[i].id + '">' + data.data[i].nama_obyek + '</td>';
+                    html += '<td><a href="#" id="rowNamaObjek' + data.data[i].id + '" onclick="goToRincianObjekTab(\'' + data.data[i].id + '\')">' + data.data[i].nama_obyek + '</a></td>';
                     if (user.role === 'superadmin') {
                         html += '<td>';
                         html += '<button class="btn btn-xs btn-outline-warning" onclick="editObjek(\'' + data.data[i].id + '\')" id="btnEditObjek' + data.data[i].id + '" data-update-url="" data-objek-id="' + data.data[i].id + '"><i class="fa fa-edit"></i></button> ';
@@ -649,6 +701,143 @@ function deleteObjek(id) {
                 success: function (data) {
                     successSwal('Berhasil menghapus data objek');
                     $('#rowObjek' + id).remove();
+                },
+            });
+        }
+    })
+}
+
+function goToRincianObjekTab(objekId) {
+    $('#content-objek-tab').removeClass('active');
+    $('#objek').removeClass(['active show']);
+    $('#content-rincian-objek-tab').addClass('active');
+    $('#rincian-objek').addClass('active show');
+    getDataRincianObjek(objekId);
+}
+
+/**
+ * Rekening Rincian Objek
+ */
+function getDataRincianObjek(objekId) {
+    var html = '';
+
+    $('#btnTambahRincianObjek').show();
+    $('#tableRincianObjek').hide();
+    $('#noDataRincianObjek').hide();
+    $('#rincianObjekLoader').append('<div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>');
+    $.ajax({
+        type: 'GET',
+        url: rincianObjekUrl + 'by-objek/' + objekId,
+        dataType: 'json',
+        success: function (data) {
+            $('#tableRincianObjekBody').html('');
+            html = '';
+            console.log(data)
+            if (data.data.length > 0) {
+                objek = data.data[0].obyek;
+                jenis = data.data[0].obyek.jenis;
+                kelompok = data.data[0].obyek.jenis.kelompok;
+                akun = data.data[0].obyek.jenis.kelompok.akun;
+
+                for (var i = 0; i < data.data.length; i++) {
+                    html += '<tr id="rowRincianObjek' + data.data[i].id + '">';
+                    html += '<td>' + akun.kode + '</td>';
+                    html += '<td>' + kelompok.kode + '</td>';
+                    html += '<td>' + jenis.kode + '</td>';
+                    html += '<td>' + objek.kode + '</td>';
+                    html += '<td id="rowKodeRincianObjek' + data.data[i].id + '">' + data.data[i].kode + '</td>';
+                    html += '<td id="rowNamaRincianObjek' + data.data[i].id + '">' + data.data[i].nama_rincian_obyek + '</td>';
+                    if (user.role === 'superadmin') {
+                        html += '<td>';
+                        html += '<button class="btn btn-xs btn-outline-warning" onclick="editRincianObjek(\'' + data.data[i].id + '\')" id="btnEditRincianObjek' + data.data[i].id + '" data-update-url="" data-rincian-objek-id="' + data.data[i].id + '"><i class="fa fa-edit"></i></button> ';
+                        html += '<button class="btn btn-xs btn-outline-danger" id="btnDeleteRincianObjek' + data.data[i].id + '" data-delete-url="' + rincianObjekUrl + 'delete/' + data.data[i].id + '" data-rincian-objek-id="' + data.data[i].id + '" onclick="deleteRincianObjek(' + data.data[i].id + ')"> <i class="fa fa-trash"></i></button>';
+                        html += '</td>';
+                    }
+                    html += '</tr>';
+                }
+                $('#rincianObjekLoader').html('');
+                $('#tableRincianObjek').show();
+                $('#tableRincianObjekBody').html(html);
+            } else {
+                $('#noDataRincianObjek').show();
+                $.ajax({
+                    type: 'GET',
+                    url: objekUrl + 'show/' + objekId,
+                    dataType: 'json',
+                    success: function (data) {
+                        objek = data.data;
+                        jenis = data.data.jenis;
+                        kelompok = data.data.jenis.kelompok;
+                        akun = data.data.jenis.kelompok.akun;
+                    },
+                });
+                $('#rincianObjekLoader').html('');
+            }
+        },
+    });
+}
+
+function editRincianObjek(id) {
+    $('#modalFormRincianObjek').text('Form Ubah Rincian Objek');
+    $('#btnSimpanRincianObjek').hide();
+    $('#btnSimpanUbahRincianObjek').show();
+    $('#formRincianObjek').trigger('reset');
+
+    $.ajax({
+        type: 'GET',
+        url: rincianObjekUrl + 'show/' + id,
+        dataType: 'json',
+        success: function (data) {
+            $('#objekId').val(objek.id);
+            $('#objekRincianObjek').val(objek.kode + '...' + objek.nama_obyek);
+            $('#kodeRincianObjek').val(data.data.kode);
+            $('#namaRincianObjek').val(data.data.nama_rincian_obyek);
+            $('#rincianObjekId').remove();
+            $('#formRincianObjek').append('<input type="hidden" name="rincian_objek_id" id="rincianObjekId" value="' + data.data.id + '"/>');
+        },
+    });
+
+    $('#modalRincianObjek').modal('show');
+}
+
+function updateRincianObjek(e) {
+    e.preventDefault();
+    $.ajax({
+        type: 'PUT',
+        url: rincianObjekUrl + 'update/' + $('#rincianObjekId').val(),
+        dataType: 'json',
+        data: $('#formRincianObjek').serialize(),
+        success: function (data) {
+            if (data.status) {
+                $('#modalRincianObjek').modal('hide');
+                $.ajax({
+                    type: 'GET',
+                    url: rincianObjekUrl + 'show/' + $('#rincianObjekId').val(),
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#rowKodeRincianObjek' + data.data.id).text(data.data.kode);
+                        $('#rowNamaRincianObjek' + data.data.id).text(data.data.nama_rincian_obyek);
+                    },
+                });
+                successSwal('Berhasil mengubah data rincian objek.');
+            } else {
+                showError(data.error, 'formRincianObjek')
+            }
+        },
+    });
+}
+
+function deleteRincianObjek(id) {
+    var url = $('#btnDeleteRincianObjek' + id).data('delete-url');
+    Swal.fire(confirmDelete).then((result) => {
+        if (result.value) {
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function (data) {
+                    successSwal('Berhasil menghapus data rincian objek');
+                    $('#rowRincianObjek' + id).remove();
                 },
             });
         }

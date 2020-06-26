@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helper\RekeningHelper;
 use App\Models\RekeningAkun;
 use App\Models\RekeningJenis;
 use App\Models\RekeningKelompok;
 use App\Models\RekeningObyek;
+use App\Models\RekeningRincianObyek;
 use App\Models\TahunRekening;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -27,11 +29,11 @@ class RekeningController extends AppController
         $validator = Validator::make($request->all(), [
             'kode_akun' => 'required',
             'nama_akun' => 'required',
-            'alias' => 'required',
+            'alias_akun' => 'required',
         ], [
             'kode_akun.required' => 'Kode akun tidak boleh kosong.',
             'nama_akun.required' => 'Nama akun tidak boleh kosong.',
-            'alias.required' => 'Anda belum memilih nama alias akun.',
+            'alias_akun.required' => 'Anda belum memilih nama alias akun.',
         ]);
 
         if ($validator->fails()) {
@@ -42,6 +44,7 @@ class RekeningController extends AppController
             'kode' => $request->kode_akun,
             'nama_akun' => $request->nama_akun,
             'alias' => $request->alias_akun,
+            'tahun_rekening_id' => RekeningHelper::tahunRekening()->id,
             'created_by' => auth()->user()->id
         ]);
 
@@ -65,12 +68,12 @@ class RekeningController extends AppController
         $validator = Validator::make($request->all(), [
             'kode_akun' => 'required',
             'nama_akun' => 'required',
-            'alias' => 'required',
+            'alias_akun' => 'required',
 
         ], [
             'kode_akun.required' => 'Kode akun tidak boleh kosong.',
             'nama_akun.required' => 'Nama akun tidak boleh kosong.',
-            'alias.required' => 'Anda belum memilih nama alias akun.',
+            'alias_akun.required' => 'Anda belum memilih nama alias akun.',
 
         ]);
 
@@ -99,7 +102,7 @@ class RekeningController extends AppController
     }
 
     /*
-     * Data Organisasi Kelompok
+     * Data Rekening Kelompok
      */
     function getKelompok()
     {
@@ -183,7 +186,7 @@ class RekeningController extends AppController
     }
 
     /*
-    * Data Organisasi Jenis
+    * Data Rekening Jenis
     */
     function getJenis()
     {
@@ -267,7 +270,7 @@ class RekeningController extends AppController
     }
 
     /*
-    * Data Organisasi Objek
+    * Data Rekening Objek
     */
     function getObjek()
     {
@@ -346,6 +349,90 @@ class RekeningController extends AppController
     {
         $objek = RekeningObyek::findOrFail($id);
         $objek->delete();
+
+        return response()->json(['status' => true, 'message' => 'Berhasil.']);
+    }
+
+    /*
+    * Data Rekening Rincian Objek
+    */
+    function getRincianObjek()
+    {
+        $rincianObjek = RekeningRincianObyek::orderBy('kode')->get();
+        return $this->successResponse($rincianObjek);
+    }
+
+    public function storeRincianObjek(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'kode_rincian_objek' => 'required',
+            'nama_rincian_objek' => 'required',
+        ], [
+            'kode_rincian_objek.required' => 'Kode rincian objek tidak boleh kosong.',
+            'nama_rincian_objek.required' => 'Nama rincian objek tidak boleh kosong.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'error' => $validator->errors()]);
+        }
+
+        $rincianObjek = RekeningRincianObyek::create([
+            'obyek_id' => $request->obyek_id,
+            'kode' => $request->kode_rincian_objek,
+            'nama_rincian_obyek' => $request->nama_rincian_objek,
+            'created_by' => auth()->user()->id
+        ]);
+
+        if ($rincianObjek)
+            return $this->createdResponse($rincianObjek);
+
+        return $this->storeFailedResponse();
+    }
+
+    function getRincianObjekByObjek($obyek_id)
+    {
+        $objek = RekeningRincianObyek::with('obyek.jenis.kelompok.akun')->where('obyek_id', '=', $obyek_id)->orderBy('kode')->get();
+        return $this->successResponse($objek);
+    }
+
+    public function showRincianObjek($id)
+    {
+        $rincianObjek = RekeningRincianObyek::with('obyek.jenis.kelompok.akun')->findOrFail($id);
+        if ($rincianObjek)
+            return $this->successResponse($rincianObjek);
+
+        return $this->nullResponse();
+    }
+
+    public function updateRincianObjek(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'kode_rincian_objek' => 'required',
+            'nama_rincian_objek' => 'required',
+        ], [
+            'kode_rincian_objek.required' => 'Kode rincian objek tidak boleh kosong.',
+            'nama_rincian_objek.required' => 'Nama rincian objek tidak boleh kosong.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'error' => $validator->errors()]);
+        }
+
+        $rincianObjek = RekeningRincianObyek::findOrFail($id)->update([
+            'kode' => $request->kode_rincian_objek,
+            'nama_rincian_obyek' => $request->nama_rincian_objek,
+        ]);
+
+        if ($rincianObjek)
+            return $this->successResponse($rincianObjek);
+
+        return $this->storeFailedResponse();
+    }
+
+    public function deleteRincianObjek($id)
+    {
+        $rincianObjek = RekeningRincianObyek::findOrFail($id);
+        $rincianObjek->delete();
 
         return response()->json(['status' => true, 'message' => 'Berhasil.']);
     }

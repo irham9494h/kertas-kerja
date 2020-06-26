@@ -126,6 +126,17 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/delete/{id}', 'RekeningController@deleteObjek')->name('rek.objek.delete');
 
         });
+
+        Route::group(['prefix' => 'rincian-objek'], function () {
+
+            Route::get('/', 'RekeningController@getRincianObjek')->name('rek.rincian-objek.index');
+            Route::get('/by-objek/{id}', 'RekeningController@getRincianObjekByObjek')->name('org.rincian-objek.by-objek');
+            Route::post('/store', 'RekeningController@storeRincianObjek')->name('rek.rincian-objek.store');
+            Route::get('/show/{id}', 'RekeningController@showRincianObjek')->name('rek.rincian-objek.show');
+            Route::put('/update/{id}', 'RekeningController@updateRincianObjek')->name('rek.rincian-objek.update');
+            Route::get('/delete/{id}', 'RekeningController@deleteRincianObjek')->name('rek.rincian-objek.delete');
+
+        });
     });
 
     Route::group(['prefix' => 'sb'], function () {
@@ -165,5 +176,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     //Belanja
     Route::get('sb-tgl/belanja/{tanggal_id}/all', 'TanggalKertasKerjaController@fetchBelanja')->name('sb-tahun.belanja  .all');
+
+    //LAPORAN
+    Route::get('report/kertas-kerja/2020', 'Laporan\LaporanKertasKerjaController@laporan2020')->name('lap-kk-2020');
 
 });

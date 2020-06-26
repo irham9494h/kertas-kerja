@@ -10,7 +10,17 @@ class TahunSumberDana extends Model
 
     protected $guarded = [];
 
-    public function tanggal(){
+    public static function dalamPembahasan(){
+        return 0;
+    }
+
+    public static function fix()
+    {
+        return 1;
+    }
+
+    public function tanggal()
+    {
         return $this->hasMany(TanggalSumberDana::class, 'sd_tahun_id');
     }
 }

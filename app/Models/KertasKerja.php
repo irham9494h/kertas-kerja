@@ -11,7 +11,7 @@ class KertasKerja extends Model
     protected $guarded = [];
 
     public function tanggal(){
-        return $this->belongsTo(TanggalSumberDana::class);
+        return $this->belongsTo(TanggalSumberDana::class, 'sd_tanggal_id');
     }
 
     public function unit()

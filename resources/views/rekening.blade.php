@@ -53,6 +53,11 @@
                                    href="#objek" role="tab"
                                    aria-controls="content-objek" aria-selected="false">Objek</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="content-rincian-objek-tab" data-toggle="pill"
+                                   href="#rincian-objek" role="tab"
+                                   aria-controls="content-rincian-objek" aria-selected="false">Rincian Objek</a>
+                            </li>
                         </ul>
                         <div class="tab-content" id="custom-content-above-tabContent">
                             <div class="tab-pane fade active show" id="akun" role="tabpanel"
@@ -198,6 +203,39 @@
                                     </tr>
                                     </thead>
                                     <tbody id="tableObjekBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="rincian-objek" role="tabpanel"
+                                 aria-labelledby="content-rincian-objek-tab">
+                                @can('isSuperAdmin')
+                                    <div class="row pt-1 pb-1 pl-2 pr-2 justify-content-end">
+                                        <button class="btn btn-outline-primary btn-sm" id="btnTambahRincianObjek"
+                                                data-mode="create" data-id-jenis="" data-kode-jenis="" data-jenis=""
+                                                style="display: none">
+                                            <i class="fa fa-plus"></i> Tambah
+                                        </button>
+                                    </div>
+                                @endcan
+
+                                <div class="d-flex justify-rincian-content-center" id="rincianObjekLoader"></div>
+                                <h3 class="text-center mt-3" id="noDataRincianObjek">Tidak ada data.</h3>
+
+                                <table class="table table-striped table-sm mt-1" id="tableRincianObjek" style="display: none">
+                                    <thead class="bg-danger">
+                                    <tr class="table-head">
+                                        <th style="width: 5rem">Kode Akun</th>
+                                        <th style="width: 5rem">Kode Kelompok</th>
+                                        <th style="width: 5rem">Kode Jenis</th>
+                                        <th style="width: 5rem">Kode Objek</th>
+                                        <th style="width: 5rem">Kode Rincian Objek</th>
+                                        <th>Rincian Objek</th>
+                                        @can('isSuperAdmin')
+                                            <th class="pull-right" style="width: 80px">Aksi</th>
+                                        @endcan
+                                    </tr>
+                                    </thead>
+                                    <tbody id="tableRincianObjekBody">
                                     </tbody>
                                 </table>
                             </div>
@@ -411,6 +449,55 @@
         </div>
     </div>
 
+    <!-- Rekening Rincian Objek Modal -->
+    <div class="modal fade" id="modalRincianObjek" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="modalFormRincianObjek"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h5 class="modal-title" id="modalFormRincianObjek">Form Rincian Objek</h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="#" id="formRincianObjek">
+                    <div class="modal-body">
+                        @csrf
+                        <input type="hidden" name="obyek_id" id="obyekId">
+                        <div class="form-group">
+                            <label for="objekRincianObjek">Objek</label>
+                            <input type="text" class="form-control" id="objekRincianObjek" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="kodeRincianObjek">Kode Rincian Objek</label>
+                            <input type="text" class="form-control" name="kode_rincian_objek" id="kodeRincianObjek"
+                                   placeholder="Masukan kode rincian objek">
+                            <div class="invalid-feedback" id="kode_rincian_objek">
+                                Please provide a valid city.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="namaRincianObjek">Nama Rincian Objek</label>
+                            <input type="text" class="form-control" name="nama_rincian_objek" id="namaRincianObjek"
+                                   placeholder="Masukan nama rincian objek">
+                            <div class="invalid-feedback" id="nama_rincian_objek">
+                                Please provide a valid city.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" id="rincianObjekFooter">
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanRincianObjek">Simpan</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSimpanUbahRincianObjek"
+                                onclick="updateRincianObjek(event)" style="display: none">Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -434,5 +521,5 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/rekening.min.js')}}"></script>
+    <script src="{{asset('app/rekening.js')}}"></script>
 @endsection

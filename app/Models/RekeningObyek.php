@@ -14,4 +14,9 @@ class RekeningObyek extends Model
     {
         return $this->belongsTo(RekeningJenis::class);
     }
+
+    public function rincian_obyek()
+    {
+        return $this->hasMany(RekeningRincianObyek::class);
+    }
 }
