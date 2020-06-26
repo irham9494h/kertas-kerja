@@ -62,11 +62,10 @@ class TahunKertasKerjaController extends AppController
         };
 
         $tahun = TahunSumberDana::findOrFail($sb_tahun_id);
-        $opds = OrganisasiUnit::with('bidang.urusan')->get();
         $pendapatans = RekeningJenis::with(['kelompok', 'kelompok.akun'])
             ->whereHas('kelompok.akun', $pendapatan)->get();
         $belanjas = RekeningJenis::with(['kelompok', 'kelompok.akun'])
             ->whereHas('kelompok.akun', $belanja)->get();
-        return view('kertas-kerja.kertas-kerja', compact('tahun', 'opds', 'pendapatans', 'belanjas'));
+        return view('kertas-kerja.kertas-kerja', compact('tahun','pendapatans', 'belanjas'));
     }
 }
