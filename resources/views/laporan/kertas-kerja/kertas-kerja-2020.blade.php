@@ -48,30 +48,25 @@
     </tr>
 
     {{--isi table--}}
-
-    {{--    head 1--}}
-    <tr>
-        <td class="border-right-05 table-row"><strong>1</strong></td>
-        <td class=" table-row"><strong>PENDAPATAN</strong></td>
-        <td class="border-left-05 text-right table-row"><strong>5.049.010.772.892,83</strong></td>
-    </tr>
-
-    <tr>
-        <td class="border-right-05 table-row"><strong>1</strong></td>
-        <td class=" table-row indent-2"><strong>PENDAPATAN</strong></td>
-        <td class="border-left-05 text-right table-row"><strong>5.049.010.772.892,83</strong></td>
-    </tr>
-
-    <tr>
-        <td class="border-right-05 table-row"><strong>1</strong></td>
-        <td class=" table-row indent-4"><strong>PENDAPATAN</strong></td>
-        <td class="border-left-05 text-right table-row"><strong>5.049.010.772.892,83</strong></td>
-    </tr>
-
-
+    @foreach((object)$sumberDanaFix as $sumberDana)
+        <tr id="">
+            <td class="border-right-05 table-row">{{$sumberDana['urutan']}}</td>
+            @if($sumberDana['level'] == '2')
+                <td class=" table-row" style="text-indent: 2em"><strong>{{$sumberDana['key']}}</strong></td>
+                <td class="border-left-05 text-right table-row" id="nilaiBelanja"
+                    style="border-bottom: 0.5px solid black; border-top: 0.5px solid black"><strong>{{number_format($sumberDana['nilai'], 2, ',', '.')}}</strong></td>
+            @elseif($sumberDana['level'] == '3')
+                <td class=" table-row" style="text-indent: 4em">{{$sumberDana['key']}}</td>
+                <td class="border-left-05 text-right table-row" id="nilaiBelanja">{{number_format($sumberDana['nilai'], 2, ',', '.')}}</td>
+            @else
+                <td class=" table-row" style=""><strong>{{$sumberDana['key']}}</strong></td>
+                <td class="border-left-05 text-right table-row" id="nilaiBelanja"
+                    style="border-bottom: 0.5px solid black; border-top: 0.5px solid black"><strong>{{number_format($sumberDana['nilai'], 2, ',', '.')}}</strong></td>
+            @endif
+        </tr>
+    @endforeach
     </tbody>
 </table>
-
 
 <hr>
 
@@ -125,5 +120,12 @@
 {{--    </tbody>--}}
 {{--</table>--}}
 
+
+<table>
+    <tbody>
+
+
+    </tbody>
+</table>
 </body>
 </html>

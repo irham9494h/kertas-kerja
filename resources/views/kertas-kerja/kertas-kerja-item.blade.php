@@ -77,11 +77,26 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Rencana Anggaran Tahun {{$tahun->tahun}}</h3>
+                        <h3 class="card-title">{{$title}}</h3>
                         <div class="card-tools">
                             <a href="{{route('sb-tahun')}}" class="btn btn-outline-secondary btn-sm"><i
                                     class="fa fa-arrow-left"></i> Kembali
                             </a>
+                            @if($tahun->tanggal->count() > 0)
+                                @if($tahun->tanggal->first()->jenis_pembahasan == 'struktur_murni')
+                                    <div class="btn-group btn-group-xs">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
+                                                class="fa fa-bars"></i></button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <button class="dropdown-item" type="button" id="btnHapusKertasKerja"
+                                                    data-id="{{$tahun->id}}"
+                                                    onclick="">Kunci Struktu Murni
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endif
                         </div>
                     </div>
                     <div class="card-body p-1 pl-2 pr-2">
@@ -92,13 +107,15 @@
                             @foreach($tahun->tanggal as $tanggal)
                                 <div class="btn-group btn-group-xs btn-kertas-kerja-g" role="group"
                                      id="tglKertasKerja{{$tanggal->id}}" data-tanggal-id="{{$tanggal->id}}">
-                                    {{--                                    <button type="button"--}}
-                                    {{--                                            class="btn btn-xs btn-outline-dark btn-kertas-kerja"--}}
-                                    {{--                                            onclick="fetchKertasKerja('{{$tanggal->tanggal}}','{{$tanggal->id}}')"--}}
-                                    {{--                                            id="btnFetchKertasKerja{{$tanggal->id}}">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</button>--}}
-                                    <a href="{{route('sb-tahun.fetch-pendapatan', [$tahun->id, $tanggal->id])}}"
-                                       class="btn btn-xs btn-kertas-kerja {{$tanggal->id == $tanggal_id ? 'btn-dark' :'btn-outline-dark'}}"
-                                       id="btnFetchKertasKerja{{$tanggal->id}}">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
+                                    @if($tanggal->jenis_pembahasan == 'struktur_murni')
+                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, $tanggal->id, 'murni'])}}"
+                                           class="btn btn-xs btn-kertas-kerja {{$tanggal->id == $tanggal_id ? 'btn-dark' :'btn-outline-dark'}}"
+                                           id="btnFetchKertasKerja{{$tanggal->id}}">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
+                                    @else
+                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, $tanggal->id, 'peruhbahan'])}}"
+                                           class="btn btn-xs btn-kertas-kerja {{$tanggal->id == $tanggal_id ? 'btn-dark' :'btn-outline-dark'}}"
+                                           id="btnFetchKertasKerja{{$tanggal->id}}">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
+                                    @endif
                                     @if($loop->last)
                                         <button onclick="deleteTanggalKertasKerja('{{$tanggal->id}}')"
                                                 class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal"><i
@@ -543,7 +560,8 @@
                         <div class="form-check" id="updateModalGunakanPembiayaan" style="display: none">
                             <input type="checkbox" class="form-check-input" id="UpdateModalpembiayaanCheckbox"
                                    name="pembiayaan_checkbox" value="1" disabled>
-                            <label class="form-check-label" for="UpdateModalpembiayaanCheckbox"><strong>Gunakan Pembiayaan</strong></label>
+                            <label class="form-check-label" for="UpdateModalpembiayaanCheckbox"><strong>Gunakan
+                                    Pembiayaan</strong></label>
                         </div>
 
                         <div class="form-group" id="updateModalBelanjaPembiayaan" style="display:none;">
@@ -556,7 +574,8 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <span class="text-danger mt-1" id="updateModalPembiayaanWarning" style="display: none"><small>Nilai pembiayaan tidak mencukupi.</small></span>
+                            <span class="text-danger mt-1" id="updateModalPembiayaanWarning"
+                                  style="display: none"><small>Nilai pembiayaan tidak mencukupi.</small></span>
                         </div>
                     </div>
                     <div class="modal-footer">

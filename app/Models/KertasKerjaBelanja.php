@@ -27,6 +27,6 @@ class KertasKerjaBelanja extends Model
 
     public function kertas_kerja_pendapatan()
     {
-        return $this->belongsTo(KertasKerja::class, 'pendapatan_id');
+        return $this->belongsTo(KertasKerjaPendapatan::class, 'pendapatan_id');
     }
 }

@@ -16,7 +16,7 @@ class TanggalSumberDana extends Model
 
     public function kertas_kerja()
     {
-        return $this->hasMany(KertasKerja::class, 'sd_tanggal_id');
+        return $this->hasMany(KertasKerjaPendapatan::class, 'sd_tanggal_id');
     }
 
     public function kertas_kerja_belanja()

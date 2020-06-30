@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\KertasKerja;
+use App\Models\KertasKerjaPendapatan;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PendapatanResource extends JsonResource
@@ -29,9 +29,8 @@ class PendapatanResource extends JsonResource
 
     public function uraianPendapatan($tgl_id, $unit_id)
     {
-        $pendapatan = KertasKerja::with('jenis')
+        $pendapatan = KertasKerjaPendapatan::with('jenis')
             ->where('unit_id', '=', $unit_id)
-            ->where('jenis_item', '=', 'pendapatan')
             ->where('sd_tanggal_id', '=', $tgl_id)
             ->get();
 

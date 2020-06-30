@@ -34,7 +34,7 @@ class OrganisasiUnit extends Model
 
     public function kertas_kerja()
     {
-        return $this->hasMany(KertasKerja::class, 'unit_id', 'id');
+        return $this->hasMany(KertasKerjaPendapatan::class, 'unit_id', 'id');
     }
 
     public function kertas_kerja_belanja()

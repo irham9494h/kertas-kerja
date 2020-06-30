@@ -10,11 +10,20 @@ class TahunSumberDana extends Model
 
     protected $guarded = [];
 
-    public static function dalamPembahasan(){
+    public static function pembahasanStrukturMurni(){
         return 0;
     }
 
-    public static function fix()
+    public static function strukturMurniFix()
+    {
+        return 1;
+    }
+
+    public static function pembahasanStrukturPerubahan(){
+        return 0;
+    }
+
+    public static function strukturPerubahanFix()
     {
         return 1;
     }

@@ -49,11 +49,16 @@
                                         @endif
                                         <td>
                                             <div class="btn-group btn-group-xs">
-                                                <button class="btn btn-outline-primary btn-xs dropdown-toggle" type="button"
-                                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
+                                                <button class="btn btn-outline-primary btn-xs dropdown-toggle"
+                                                        type="button"
+                                                        data-toggle="dropdown" aria-haspopup="true"
+                                                        aria-expanded="false"><i
                                                         class="fa fa-bars"></i></button>
                                                 <div class="dropdown-menu dropdown-menu-right">
-                                                    <a href="{{route('sb-tahun.kertas-kerja', $tahun->id)}}" class="dropdown-item" type="button">Buka</a>
+                                                    <a href="{{route('sb-tahun.kertas-kerja', [$tahun->id, 'murni'])}}"
+                                                       class="dropdown-item" type="button">Struktur Murni</a>
+                                                    <a href="{{route('sb-tahun.kertas-kerja', [$tahun->id, 'perubahan'])}}"
+                                                       class="dropdown-item" type="button">Struktur Perubahan</a>
                                                     <button class="dropdown-item" type="button" id="btnHapusKertasKerja"
                                                             data-id="{{$tahun->id}}"
                                                             onclick="deleteKertasKerja('{{$tahun->id}}')">Hapus
@@ -64,7 +69,9 @@
                                     </tr>
                                 @endforeach
                             @else
-                                <tr><td colspan="3" class="text-center">tidak ada data</td></tr>
+                                <tr>
+                                    <td colspan="3" class="text-center">tidak ada data</td>
+                                </tr>
                             @endif
                             </tbody>
                         </table>

@@ -34,7 +34,7 @@ class RekeningJenis extends Model
 
     public function kertas_kerja()
     {
-        return $this->hasMany(KertasKerja::class, 'jenis_id', 'id');
+        return $this->hasMany(KertasKerjaPendapatan::class, 'jenis_id', 'id');
     }
 
     public function kertas_kerja_belanja()

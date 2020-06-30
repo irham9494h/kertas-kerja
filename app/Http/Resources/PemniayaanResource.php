@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\KertasKerja;
+use App\Models\KertasKerjaPendapatan;
 use App\Models\KertasKerjaPembiayaan;
 use Illuminate\Http\Resources\Json\JsonResource;
 

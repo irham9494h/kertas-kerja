@@ -8,7 +8,7 @@ use App\Http\Resources\CreatePemniayaanResource;
 use App\Http\Resources\CreatePendapatanResource;
 use App\Http\Resources\PemniayaanResource;
 use App\Http\Resources\PendapatanResource;
-use App\Models\KertasKerja;
+use App\Models\KertasKerjaPendapatan;
 use App\Models\KertasKerjaBelanja;
 use App\Models\KertasKerjaPembiayaan;
 use App\Models\OrganisasiUnit;
@@ -73,17 +73,22 @@ class KertasKerjaController extends AppController
      * Tanggal Kertas Kerja --------------------------------------------------------------------------------------------
      */
 
-    public function tanggalKertasKerja($tahun_id)
+    public function tanggalKertasKerja($tahun_id, $pembahasan)
     {
-        $tahun = TahunSumberDana::with('tanggal')->where('id', '=', $tahun_id)->first();
-        return view('kertas-kerja.kertas-kerja', compact('tahun'));
+        $tahun = TahunSumberDana::where('id', '=', $tahun_id)->firstOrFail();
+        $tanggal = TanggalSumberDana::where('sd_tahun_id', '=', $tahun_id);
+
+        if ($pembahasan == 'murni') {
+            $tanggal->where('jenis_pembahasan', '=', 'struktur_murni');
+            $title = 'Pembahasan Struktur Murni Tahun ' . $tahun->tahun;
+        } else {
+            $tanggal->where('jenis_pembahasan', '=', 'struktur_perubahan');
+            $title = 'Pembahasan Struktur Perubahan Tahun ' . $tahun->tahun;
+        }
+        $tanggal_kertas_kerja = $tanggal->get();
+
+        return view('kertas-kerja.kertas-kerja', compact('tahun', 'tanggal_kertas_kerja', 'title'));
     }
-
-    public function fetchTanggalKertasKerja()
-    {
-
-    }
-
     /*
      * Akhir tanggal kertas kerja
      */
@@ -91,7 +96,7 @@ class KertasKerjaController extends AppController
     /*
      * Pendapatan ------------------------------------------------------------------------------------------------------
      */
-    public function fetchPendapatan($tahun_id, $tanggal_id)
+    public function fetchKertasKerja($tahun_id, $tanggal_id, $pembahasan)
     {
         $tahunRek = TahunRekening::where('status', '=', 1)->firstOrFail();
         $tahun = TahunSumberDana::with('tanggal')->where('id', '=', $tahun_id)->first();
@@ -114,25 +119,30 @@ class KertasKerjaController extends AppController
             ->where('rek_akun.tahun_rekening_id', '=', $tahunRek->id)
             ->select('rek_akun.kode as kode_akun', 'rek_kelompok.kode as kode_kelompok', 'rek_jenis.*')
             ->get();
-        $pendapatans = KertasKerja::with(['unit'])
-            ->where('sd_tanggal_id', '=', $tanggal_id)->where('jenis_item', '=', 'pendapatan')
+
+        if ($pembahasan == 'murni') {
+            $title = 'Pembahasan Struktur Murni Tahun ' . $tahun->tahun;
+        } else {
+            $title = 'Pembahasan Struktur Perubahan Tahun ' . $tahun->tahun;
+        }
+
+        $pendapatans = KertasKerjaPendapatan::with(['unit'])
+            ->where('sd_tanggal_id', '=', $tanggal_id)
             ->groupBy('unit_id')->get();
 
         return view('kertas-kerja.kertas-kerja-item', compact('tahun', 'opds', 'pendapatans', 'tanggal_id',
-            'rekPendapatans', 'rekBelanjas', 'rekPembiayaans'));
+            'rekPendapatans', 'rekBelanjas', 'rekPembiayaans', 'title'));
     }
 
     public function fetchPendapatanJson($tgl_id)
     {
-        $totalSumberDana = KertasKerja::where('sd_tanggal_id', '=', $tgl_id)
-            ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
+        $totalSumberDana = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $tgl_id)
+            ->sum('nilai');
         $opds = OrganisasiUnit::with('bidang.urusan')->get();
-        $pendapatan = KertasKerja::with(['unit', 'jenis'])
+        $pendapatan = KertasKerjaPendapatan::with(['unit', 'jenis'])
             ->where('sd_tanggal_id', '=', $tgl_id)
-            ->where('jenis_item', '=', 'pendapatan')
             ->groupBy('unit_id')
             ->get();
-//        return dd($pendapatan);
         return response()->json(['data' => PendapatanResource::collection($pendapatan),
             'opd' => $opds, 'totalSumberDana' => $totalSumberDana], 200);
     }
@@ -155,11 +165,9 @@ class KertasKerjaController extends AppController
             return response()->json(['status' => false, 'error' => $validator->errors()]);
         }
 
-        $request = $request->merge(['jenis_item' => 'pendapatan']);
-
-        $pendapatan = KertasKerja::create($request->all());
-        $totalSumberDana = KertasKerja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
-            ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
+        $pendapatan = KertasKerjaPendapatan::create($request->all());
+        $totalSumberDana = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+            ->sum('nilai');
         if ($pendapatan)
 
             return $this->createdResponse(new CreatePendapatanResource($pendapatan), $totalSumberDana);
@@ -169,12 +177,12 @@ class KertasKerjaController extends AppController
 
     public function updateNominal(Request $request)
     {
-        $itemKertasKerja = KertasKerja::findOrFail($request->uraian_id);
+        $itemKertasKerja = KertasKerjaPendapatan::findOrFail($request->uraian_id);
         $itemKertasKerja->nilai = $request->new_nominal;
         $itemKertasKerja->save();
 
-        $totalSumberDana = KertasKerja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
-            ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
+        $totalSumberDana = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+            ->sum('nilai');
 
         if ($itemKertasKerja)
             return response()->json(['status' => true, 'message' => 'Berhasil mengubah nominal.', 'totalSumberDana' => $totalSumberDana, 'data' => $itemKertasKerja], 200);
@@ -193,7 +201,7 @@ class KertasKerjaController extends AppController
     {
         $totalBelanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $tanggal_id)->sum('nilai');
         $totalBelanjaPembiayaan = KertasKerjaBelanja::where('sd_tanggal_id', '=', $tanggal_id)->sum('nilai_pembiayaan');
-        $pendapatan = KertasKerja::where('jenis_item', '=', 'pendapatan')->where('sd_tanggal_id', '=', $tanggal_id)
+        $pendapatan = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $tanggal_id)
             ->sum('nilai');
         $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $tanggal_id)->sum('nilai');
 
@@ -266,7 +274,7 @@ class KertasKerjaController extends AppController
 
         $totalBelanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
         $totalBelanjaPembiayaan = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai_pembiayaan');
-        $pendapatan = KertasKerja::where('jenis_item', '=', 'pendapatan')->where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+        $pendapatan = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
             ->sum('nilai');
         $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
 
@@ -329,7 +337,7 @@ class KertasKerjaController extends AppController
         $totalBelanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
 
         $totalBelanjaPembiayaan = KertasKerjaBelanja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai_pembiayaan');
-        $pendapatan = KertasKerja::where('jenis_item', '=', 'pendapatan')->where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+        $pendapatan = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
             ->sum('nilai');
         $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
 
@@ -362,7 +370,7 @@ class KertasKerjaController extends AppController
     public function fetchPembiayaan($tanggal_id)
     {
         $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $tanggal_id)->sum('nilai');
-        $pendapatan = KertasKerja::where('jenis_item', '=', 'pendapatan')->where('sd_tanggal_id', '=', $tanggal_id)
+        $pendapatan = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $tanggal_id)
             ->sum('nilai');
         $totalSumberDana = $pendapatan + $totalPembiayaan;
         $opds = OrganisasiUnit::with('bidang.urusan')->get();
@@ -397,8 +405,8 @@ class KertasKerjaController extends AppController
 
         $pembiayaan = KertasKerjaPembiayaan::create($request->all());
         $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
-        $totalPendapatan = KertasKerja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
-            ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
+        $totalPendapatan = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+            ->sum('nilai');
         $totalSumberDana = $totalPendapatan - $totalPembiayaan;
         if ($pembiayaan)
             return response()->json([
@@ -418,8 +426,8 @@ class KertasKerjaController extends AppController
         $itemKertasKerja->save();
 
         $totalPembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)->sum('nilai');
-        $totalPendapatan = KertasKerja::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
-            ->where('jenis_item', '=', 'pendapatan')->sum('nilai');
+        $totalPendapatan = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $request->sd_tanggal_id)
+            ->sum('nilai');
         $totalSumberDana = $totalPendapatan - $totalPembiayaan;
 
         if ($itemKertasKerja)

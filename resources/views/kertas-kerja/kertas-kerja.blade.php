@@ -73,11 +73,26 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Rencana Anggaran Tahun {{$tahun->tahun}}</h3>
+                        <h3 class="card-title">{{$title}}</h3>
                         <div class="card-tools">
                             <a href="{{route('sb-tahun')}}" class="btn btn-outline-secondary btn-sm"><i
                                     class="fa fa-arrow-left"></i> Kembali
                             </a>
+                            @if($tanggal_kertas_kerja->count() > 0)
+                                @if($tanggal_kertas_kerja->first()->jenis_pembahasan == 'struktur_murni')
+                                    <div class="btn-group btn-group-xs">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
+                                                class="fa fa-bars"></i></button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <button class="dropdown-item" type="button" id="btnHapusKertasKerja"
+                                                    data-id="{{$tahun->id}}"
+                                                    onclick="">Kunci Struktu Murni
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endif
                         </div>
                     </div>
                     <div class="card-body p-1 pl-2 pr-2">
@@ -85,14 +100,19 @@
                             <button class="btn btn-outline-primary btn-xs" data-tahun-id="{{$tahun->id}}"
                                     id="btnTambahSbTanggal"><i
                                     class="fa fa-plus"></i></button>
-                            @foreach($tahun->tanggal as $tanggal)
+                            @foreach($tanggal_kertas_kerja as $tanggal)
                                 <div class="btn-group btn-group-xs btn-kertas-kerja-g" role="group"
                                      id="tglKertasKerja{{$tanggal->id}}" data-tanggal-id="{{$tanggal->id}}">
-                                    <a href="{{route('sb-tahun.fetch-pendapatan', [$tahun->id, $tanggal->id])}}"
-                                       class="btn btn-xs btn-outline-dark btn-kertas-kerja">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
+                                    @if($tanggal->jenis_pembahasan == 'struktur_murni')
+                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, $tanggal->id, 'murni'])}}"
+                                           class="btn btn-xs btn-outline-dark btn-kertas-kerja">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
+                                    @else
+                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, $tanggal->id, 'perubahan'])}}"
+                                           class="btn btn-xs btn-outline-dark btn-kertas-kerja">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
+                                    @endif
                                     @if($loop->last)
                                         <button onclick="deleteTanggalKertasKerja('{{$tanggal->id}}')"
-                                           class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal"><i
+                                                class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal"><i
                                                 class="fa fa-times"></i></button>
                                     @endif
                                 </div>
@@ -174,5 +194,5 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/kertas-kerja.min.js')}}"></script>
+    <script src="{{asset('app/kertas-kerja.js')}}"></script>
 @endsection

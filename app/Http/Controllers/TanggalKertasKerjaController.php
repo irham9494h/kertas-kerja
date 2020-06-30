@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Helper\TanggalKertasKerjaHelper;
 use App\Http\Resources\CreatePendapatanResource;
 use App\Http\Resources\PendapatanResource;
-use App\Models\KertasKerja;
+use App\Models\KertasKerjaPendapatan;
 use App\Models\KertasKerjaBelanja;
 use App\Models\KertasKerjaPembiayaan;
 use App\Models\OrganisasiUnit;
@@ -36,7 +36,7 @@ class TanggalKertasKerjaController extends AppController
             if (TanggalKertasKerjaHelper::checkIfDateIsLowerThanOtherDate($request->all())) {
                 $latestDate = TanggalSumberDana::where('sd_tahun_id', '=', $request->sb_tahun_id)
                     ->latest()->first();
-                $items = KertasKerja::where('sd_tanggal_id', '=', $latestDate->id)
+                $items = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $latestDate->id)
                     ->where('jenis_item', '=', 'pendapatan')
                     ->get();
 
@@ -63,7 +63,7 @@ class TanggalKertasKerjaController extends AppController
                             'nilai' => $item->nilai,
                             'jenis_item' => 'pendapatan'
                         ];
-                        $kertasKerja = KertasKerja::create($data);
+                        $kertasKerja = KertasKerjaPendapatan::create($data);
                     }
 
                     foreach ($belanja as $item) {
@@ -124,7 +124,7 @@ class TanggalKertasKerjaController extends AppController
         $tanggal = TanggalSumberDana::findOrFail($id);
         $temp = Carbon::createFromFormat('Y-m-d', $tanggal->tanggal)->format('d/m/Y');
 
-        if (KertasKerja::where('sd_tanggal_id', '=', $id)->count() > 0)
+        if (KertasKerjaPendapatan::where('sd_tanggal_id', '=', $id)->count() > 0)
             return response()->json(['status' => false, 'message' => 'Gagal menghapus tanggal kertas kerja, tanggal kertas kerja tidak kosong.'], 200);
 
         $tanggal->delete();
@@ -138,7 +138,7 @@ class TanggalKertasKerjaController extends AppController
     public function fetchPendapatan($tgl_id)
     {
         $opds = OrganisasiUnit::with('bidang.urusan')->get();
-        $pendapatan = KertasKerja::with(['unit'])
+        $pendapatan = KertasKerjaPendapatan::with(['unit'])
             ->where('sd_tanggal_id', '=', $tgl_id)
             ->where('jenis_item', '=', 'pendapatan')
             ->groupBy('unit_id')
@@ -166,7 +166,7 @@ class TanggalKertasKerjaController extends AppController
 
         $request = $request->merge(['jenis_item' => 'pendapatan']);
 
-        $pendapatan = KertasKerja::create($request->all());
+        $pendapatan = KertasKerjaPendapatan::create($request->all());
 
         if ($pendapatan)
             return $this->createdResponse(new CreatePendapatanResource($pendapatan));
@@ -177,7 +177,7 @@ class TanggalKertasKerjaController extends AppController
     public function updateNominal(Request $request)
     {
 
-        $itemKertasKerja = KertasKerja::findOrFail($request->uraian_id);
+        $itemKertasKerja = KertasKerjaPendapatan::findOrFail($request->uraian_id);
         $itemKertasKerja->nilai = $request->new_nominal;
         $itemKertasKerja->save();
 
@@ -198,7 +198,7 @@ class TanggalKertasKerjaController extends AppController
     public function fetchBelanja($tgl_id)
     {
         $opds = OrganisasiUnit::with('bidang.urusan')->get();
-        $belanja = KertasKerja::with(['unit'])
+        $belanja = KertasKerjaPendapatan::with(['unit'])
             ->where('sd_tanggal_id', '=', $tgl_id)
             ->where('jenis_item', '=', 'belanja')
             ->groupBy('unit_id')

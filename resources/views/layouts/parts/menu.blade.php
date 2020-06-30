@@ -35,7 +35,7 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item @yield('menu-kertas-kerja')" href="{{route('sb-tahun')}}">Kertas
                             Kerja</a>
-                        <a class="dropdown-item @yield('menu-laporan')" href="">Laporan</a>
+                        <a class="dropdown-item @yield('menu-laporan')" href="{{route('lap-kk')}}">Laporan</a>
                     </div>
                 </li>
                 @can('isSuperAdmin')

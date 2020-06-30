@@ -85,7 +85,8 @@ function fecthTahun() {
                     html += '<div class="btn-group btn-group-xs">';
                     html += '<button class="btn btn-outline-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-bars"></i></button>';
                     html += '<div class="dropdown-menu dropdown-menu-right">';
-                    html += '<a href="' + sbThnUrl + data.data[i].id + '/kertas-kerja" class="dropdown-item" type="button">Buka</a>';
+                    html += '<a href="' + sbThnUrl + data.data[i].id + '/kertas-kerja/murni" class="dropdown-item" type="button">Struktur Murni</a>';
+                    html += '<a href="' + sbThnUrl + data.data[i].id + '/kertas-kerja/perubahan" class="dropdown-item" type="button">Struktur Perubahan</a>';
                     html += '<button class="dropdown-item" type="button" id="btnHapusKertasKerja" data-id="' + data.data[i].id + '" onclick="deleteKertasKerja(' + data.data[i].id + ')">Hapus</button>';
                     html += '</div></div>';
                     html += '</td>';
