@@ -521,5 +521,5 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/rekening.min.js')}}"></script>
+    <script src="{{asset('app/rekening.js')}}"></script>
 @endsection

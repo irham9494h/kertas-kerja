@@ -184,5 +184,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('report/kertas-kerja/2020', 'Laporan\LaporanKertasKerjaController@laporan2020')->name('lap-kk-2020');
 //    Route::get('report/kertas-kerja/2020', 'Laporan\LaporanKertasKerjaController@laporan2020')->name('lap-kk-2020');
 
+    Route::get('rek', 'KertasKerjaController@rek');
 
+    Route::get('import', 'Import\FromExcel@index')->name('import');
+    Route::post('import-prose', 'Import\FromExcel@prosesImport')->name('import-prose');
 });
+

@@ -122,7 +122,7 @@ $(function () {
         $('#formJenis').trigger('reset');
         $('#modalJenis').modal('show');
         $('#kelompokId').val(kelompok.id);
-        $('#kelompokJenis').val(akun.kode+'.'+kelompok.kode + '. ' + kelompok.nama_kelompok);
+        $('#kelompokJenis').val(akun.kode + '.' + kelompok.kode + '. ' + kelompok.nama_kelompok);
     });
 
     $('#btnSimpanJenis').on('click', function (e) {
@@ -163,7 +163,7 @@ $(function () {
         $('#formObjek').trigger('reset');
         $('#modalObjek').modal('show');
         $('#jenisId').val(jenis.id);
-        $('#jenisObjek').val(akun.kode+'.'+kelompok.kode+'.'+jenis.kode + '. ' + jenis.nama_jenis);
+        $('#jenisObjek').val(akun.kode + '.' + kelompok.kode + '.' + jenis.kode + '. ' + jenis.nama_jenis);
     });
 
     $('#btnSimpanObjek').on('click', function (e) {
@@ -237,9 +237,12 @@ $(function () {
 
 function successSwal(message) {
     return Swal.fire(
-        'Berhasil!',
-        message,
-        'success'
+        {
+            title: "Berhasil!",
+            text: message,
+            type: "success",
+            onOpen: () => Swal.getConfirmButton().focus(),
+        }
     );
 }
 
@@ -391,7 +394,7 @@ function editKelompok(id) {
         dataType: 'json',
         success: function (data) {
             $('#akunId').val(akun.id);
-            $('#akunKelompok').val(akun.kode + '...' + akun.nama_akun);
+            $('#akunKelompok').val(akun.kode + '. ' + akun.nama_akun);
             $('#kodeKelompok').val(data.data.kode);
             $('#namaKelompok').val(data.data.nama_kelompok);
             $('#kelompokId').remove();
@@ -520,7 +523,7 @@ function editJenis(id) {
         dataType: 'json',
         success: function (data) {
             $('#kelompokId').val(kelompok.id);
-            $('#kelompokJenis').val(kelompok.kode + '...' + kelompok.nama_kelompok);
+            $('#kelompokJenis').val(akun.kode + '.' + kelompok.kode + '. ' + kelompok.nama_kelompok);
             $('#kodeJenis').val(data.data.kode);
             $('#namaJenis').val(data.data.nama_jenis);
             $('#jenisId').remove();
@@ -652,7 +655,7 @@ function editObjek(id) {
         dataType: 'json',
         success: function (data) {
             $('#jeniskId').val(jenis.id);
-            $('#jenisObjek').val(jenis.kode + '...' + jenis.nama_jenis);
+            $('#jenisObjek').val(akun.kode + '.' + kelompok.kode + '.' + jenis.kode + '. ' + jenis.nama_jenis);
             $('#kodeObjek').val(data.data.kode);
             $('#namaObjek').val(data.data.nama_obyek);
             $('#objekId').remove();
@@ -789,7 +792,7 @@ function editRincianObjek(id) {
         dataType: 'json',
         success: function (data) {
             $('#objekId').val(objek.id);
-            $('#objekRincianObjek').val(objek.kode + '...' + objek.nama_obyek);
+            $('#objekRincianObjek').val(akun.kode + '.' + kelompok.kode + '.' + jenis.kode + '.' + objek.kode + '. ' + objek.nama_obyek);
             $('#kodeRincianObjek').val(data.data.kode);
             $('#namaRincianObjek').val(data.data.nama_rincian_obyek);
             $('#rincianObjekId').remove();

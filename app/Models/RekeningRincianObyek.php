@@ -14,4 +14,9 @@ class RekeningRincianObyek extends Model
     {
         return $this->belongsTo(RekeningObyek::class);
     }
+
+    public function kertas_kerja_pendapatan()
+    {
+        return $this->hasMany(KertasKerjaPendapatan::class, 'rincian_obyek_id', 'id');
+    }
 }

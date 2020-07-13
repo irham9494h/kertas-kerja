@@ -188,11 +188,9 @@
     <script src="{{asset('assets/lte/plugins/moment/moment.min.js')}}"></script>
     <script src="{{asset('assets/lte/plugins/daterangepicker/daterangepicker.js')}}"></script>
     <script src="{{asset('assets/lte/plugins/sweetalert2/sweetalert2.min.js')}}"></script>
-    <script src="{{asset('assets/lte/plugins/select2/js/select2.full.min.js')}}"></script>
-    <script src="{{asset('app/autonumeric@4.5.4.js')}}"></script>
 
 @endsection
 
 @section('script')
-    <script src="{{asset('app/kertas-kerja.js')}}"></script>
+    <script src="{{asset('app/kertas-kerja.min.js')}}"></script>
 @endsection

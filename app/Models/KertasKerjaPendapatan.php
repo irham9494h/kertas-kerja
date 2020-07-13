@@ -24,6 +24,11 @@ class KertasKerjaPendapatan extends Model
         return $this->belongsTo(RekeningJenis::class, 'jenis_id');
     }
 
+    public function rincian_obyek()
+    {
+        return $this->belongsTo(RekeningRincianObyek::class, 'rincian_obyek_id');
+    }
+
     public function kertas_kerja_belanja()
     {
         return $this->hasMany(KertasKerjaBelanja::class, 'pendapatan_id');

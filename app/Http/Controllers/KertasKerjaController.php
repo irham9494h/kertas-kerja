@@ -22,6 +22,17 @@ use Illuminate\Support\Facades\Validator;
 
 class KertasKerjaController extends AppController
 {
+
+    public function rek(){
+        $rekPendapatans = RekeningJenis::join('rek_kelompok', 'rek_kelompok.id', 'rek_jenis.kelompok_id')
+            ->join('rek_akun', 'rek_akun.id', 'rek_kelompok.akun_id')
+            ->where('rek_akun.alias', '=', 'pendapatan')
+//            ->where('rek_akun.tahun_rekening_id', '=', 20)
+            ->select('rek_akun.kode as kode_akun', 'rek_kelompok.kode as kode_kelompok', 'rek_jenis.*')
+            ->get();
+        return dd($rekPendapatans);
+    }
+
     /*
      * Tahun kertas kerja ----------------------------------------------------------------------------------------------
      */
