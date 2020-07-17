@@ -104,10 +104,10 @@
                                 <div class="btn-group btn-group-xs btn-kertas-kerja-g" role="group"
                                      id="tglKertasKerja{{$tanggal->id}}" data-tanggal-id="{{$tanggal->id}}">
                                     @if($tanggal->jenis_pembahasan == 'struktur_murni')
-                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, $tanggal->id, 'murni'])}}"
+                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, 'murni', $tanggal->id])}}"
                                            class="btn btn-xs btn-outline-dark btn-kertas-kerja">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
                                     @else
-                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, $tanggal->id, 'perubahan'])}}"
+                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, 'perubahan', $tanggal->id])}}"
                                            class="btn btn-xs btn-outline-dark btn-kertas-kerja">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
                                     @endif
                                     @if($loop->last)
@@ -139,6 +139,7 @@
                     <div class="modal-body">
                         @csrf
                         <input type="hidden" id="tahunId" name="sb_tahun_id">
+                        <input type="hidden" id="jenisPembahasan" name="jenis_pembahasan" value="{{$pembahasan}}">
                         <div class="form-group">
                             <label for="tanggal"><span class="text-danger">*</span>Tanggal Kertas Kerja</label>
                             <input type="text" class="form-control" name="tanggal" id="tanggal"
@@ -192,5 +193,5 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/kertas-kerja.min.js')}}"></script>
+    <script src="{{asset('app/kertas-kerja.js')}}"></script>
 @endsection

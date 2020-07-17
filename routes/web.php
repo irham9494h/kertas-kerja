@@ -140,6 +140,11 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     Route::group(['prefix' => 'sb'], function () {
+        //rekening
+        Route::get('/t/kertas-kerja/rekening-pendapatan', 'KertasKerjaController@rekeningPendapatan');
+        Route::get('/t/kertas-kerja/rekening-belanja', 'KertasKerjaController@rekeningBelanja');
+        Route::get('/t/kertas-kerja/rekening-pembiayaan/{id?}', 'KertasKerjaController@rekeningPembiayaan');
+
         Route::get('/t', 'KertasKerjaController@tahunSumberDana')->name('sb-tahun');
         Route::get('/t/fetch-tahun', 'KertasKerjaController@fetchTahun')->name('sb-tahun.fetch');
         Route::post('/t/store', 'KertasKerjaController@storeTahun')->name('sb-tahun.store');
@@ -167,16 +172,10 @@ Route::group(['middleware' => 'auth'], function () {
     //Tanggal kertas kerja
     Route::post('sb-tgl/store', 'TanggalKertasKerjaController@store')->name('sb-tahun.store');
     Route::get('sb-tgl/delete/{sd_tanggal}', 'TanggalKertasKerjaController@destroy')->name('sb-tahun.delete');
-//    Route::get('sb-tgl/fetch-kertas-kerja/{sd_tanggal}', 'TanggalKertasKerjaController@fetchKertasKerja')->name('sb-tahun.fetch-kertas-kerja');
 
     //KERTAS KERJA
     //pendapatan
     Route::get('kertas-kerja/{tanggal_id}/all', 'TanggalKertasKerjaController@fetchKertasKerja')->name('kertas-kerja.pendapatan.all');
-    Route::post('sb-tgl/pendapatan/store', 'TanggalKertasKerjaController@storePendapatan')->name('sb-tahun.pendapatan.store');
-    Route::post('sb-tgl/pendapatan/update-nominal', 'TanggalKertasKerjaController@updateNominal')->name('sb-tahun.pendapatan.update-nominal');
-
-    //Belanja
-    Route::get('sb-tgl/belanja/{tanggal_id}/all', 'TanggalKertasKerjaController@fetchBelanja')->name('sb-tahun.belanja  .all');
 
     //LAPORAN
     Route::get('report/kertas-kerja', 'Laporan\LaporanKertasKerjaController@index')->name('lap-kk');

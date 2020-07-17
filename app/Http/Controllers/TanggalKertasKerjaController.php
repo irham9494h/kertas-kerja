@@ -30,14 +30,17 @@ class TanggalKertasKerjaController extends AppController
             return response()->json(['status' => false, 'error' => $validator->errors()]);
         }
 
-        $count = TanggalSumberDana::where('sd_tahun_id', '=', $request->sb_tahun_id)->count();
+        $jenisPembahasan = $request->jenis_pembahasan == 'murni' ? 'struktur_murni' : 'struktur_perubahan';
+
+        $count = TanggalSumberDana::where('sd_tahun_id', '=', $request->sb_tahun_id)
+            ->where('jenis_pembahasan', '=', $jenisPembahasan)
+            ->count();
 
         if ($count > 0) {
             if (TanggalKertasKerjaHelper::checkIfDateIsLowerThanOtherDate($request->all())) {
                 $latestDate = TanggalSumberDana::where('sd_tahun_id', '=', $request->sb_tahun_id)
                     ->latest()->first();
                 $items = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $latestDate->id)
-                    ->where('jenis_item', '=', 'pendapatan')
                     ->get();
 
                 $belanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $latestDate->id)
@@ -51,17 +54,17 @@ class TanggalKertasKerjaController extends AppController
 
                     $tanggal = TanggalSumberDana::create([
                         'tanggal' => Carbon::createFromFormat('d/m/Y', $request->tanggal)->format('Y-m-d'),
-                        'sd_tahun_id' => $request->sb_tahun_id
+                        'sd_tahun_id' => $request->sb_tahun_id,
+                        'jenis_pembahasan' => $jenisPembahasan
                     ]);
 
                     foreach ($items as $item) {
                         $data = [
                             'sd_tanggal_id' => $tanggal->id,
                             'unit_id' => $item->unit_id,
-                            'jenis_id' => $item->jenis_id,
+                            'rincian_obyek_id' => $item->rincian_obyek_id,
                             'uraian' => $item->uraian,
-                            'nilai' => $item->nilai,
-                            'jenis_item' => 'pendapatan'
+                            'nilai' => $item->nilai
                         ];
                         $kertasKerja = KertasKerjaPendapatan::create($data);
                     }
@@ -70,7 +73,7 @@ class TanggalKertasKerjaController extends AppController
                         $data = [
                             'sd_tanggal_id' => $tanggal->id,
                             'unit_id' => $item->unit_id,
-                            'jenis_id' => $item->jenis_id,
+                            'rincian_obyek_id' => $item->rincian_obyek_id,
                             'uraian' => $item->uraian,
                             'nilai' => $item->nilai,
                             'pendapatan_id' => $item->pendapatan_id,
@@ -84,7 +87,7 @@ class TanggalKertasKerjaController extends AppController
                         $data = [
                             'sd_tanggal_id' => $tanggal->id,
                             'unit_id' => $item->unit_id,
-                            'jenis_id' => $item->jenis_id,
+                            'rincian_obyek_id' => $item->rincian_obyek_id,
                             'uraian' => $item->uraian,
                             'nilai' => $item->nilai,
                         ];
@@ -99,7 +102,8 @@ class TanggalKertasKerjaController extends AppController
         } else {
             $tanggal = TanggalSumberDana::create([
                 'tanggal' => Carbon::createFromFormat('d/m/Y', $request->tanggal)->format('Y-m-d'),
-                'sd_tahun_id' => $request->sb_tahun_id
+                'sd_tahun_id' => $request->sb_tahun_id,
+                'jenis_pembahasan' => $jenisPembahasan
             ]);
         }
 
@@ -107,15 +111,6 @@ class TanggalKertasKerjaController extends AppController
             return $this->createdResponse($tanggal);
 
         return $this->storeFailedResponse();
-    }
-
-    public function fetchKertasKerja($sb_tahun_id, $tanggal_id = null)
-    {
-        if ($tanggal_id != null){
-
-        }
-        return view('kertas-kerja.kertas-kerja-item', compact('tahun'));
-//        return response()->json(['data' => $tanggal], 200);
     }
 
     public function destroy($id)
@@ -130,93 +125,4 @@ class TanggalKertasKerjaController extends AppController
         $tanggal->delete();
         return response()->json(['status' => true, 'message' => 'Berhasil menghapus data kertas kerja tanggal ' . $temp . '.'], 200);
     }
-
-    /*
-     * Pendapatan ----------------------------------------------------------------------
-     */
-
-    public function fetchPendapatan($tgl_id)
-    {
-        $opds = OrganisasiUnit::with('bidang.urusan')->get();
-        $pendapatan = KertasKerjaPendapatan::with(['unit'])
-            ->where('sd_tanggal_id', '=', $tgl_id)
-            ->where('jenis_item', '=', 'pendapatan')
-            ->groupBy('unit_id')
-            ->get();
-        return response()->json(['data' => PendapatanResource::collection($pendapatan), 'opd' => $opds], 200);
-    }
-
-    public function storePendapatan(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'jenis_id' => 'required',
-            'nilai' => 'required',
-            'unit_id' => 'required',
-            'uraian' => 'required',
-        ], [
-            'jenis_id.required' => 'Anda belum memilih rekening.',
-            'nilai.required' => 'Nilai pendapatan tidak boleh kosong.',
-            'unit_id.required' => 'Anda belum memilih OPD.',
-            'uraian.unique' => 'uraian tidak boleh kosong.',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'error' => $validator->errors()]);
-        }
-
-        $request = $request->merge(['jenis_item' => 'pendapatan']);
-
-        $pendapatan = KertasKerjaPendapatan::create($request->all());
-
-        if ($pendapatan)
-            return $this->createdResponse(new CreatePendapatanResource($pendapatan));
-
-        return $this->storeFailedResponse();
-    }
-
-    public function updateNominal(Request $request)
-    {
-
-        $itemKertasKerja = KertasKerjaPendapatan::findOrFail($request->uraian_id);
-        $itemKertasKerja->nilai = $request->new_nominal;
-        $itemKertasKerja->save();
-
-        if ($itemKertasKerja)
-            return $this->successResponse($itemKertasKerja, 'Berhasil mengubah nominal');
-
-        return $this->storeFailedResponse('Gagal mengubah nominal');
-    }
-
-    /*
-     * End of pendapatan ---------------------------------------------------------------
-     */
-
-    /*
-     * Belanja -------------------------------------------------------------------------
-     */
-
-    public function fetchBelanja($tgl_id)
-    {
-        $opds = OrganisasiUnit::with('bidang.urusan')->get();
-        $belanja = KertasKerjaPendapatan::with(['unit'])
-            ->where('sd_tanggal_id', '=', $tgl_id)
-            ->where('jenis_item', '=', 'belanja')
-            ->groupBy('unit_id')
-            ->get();
-        return response()->json(['opd' => $opds], 200);
-    }
-
-    public function storeBelanja(Request $request)
-    {
-
-    }
-
-    public function updateNominalBelanja(Request $request)
-    {
-
-    }
-
-    /*
-     * End of belanja ------------------------------------------------------------------
-     */
 }

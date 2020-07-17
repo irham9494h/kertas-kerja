@@ -16,6 +16,7 @@ const confirmDelete = {
 let oldNominal = 0;
 let tanggalKertasKerja = 0;
 let tanggalIDKertasKerja = 0;
+let jenisPembahasan = $('#jenisPembahasan').val();
 
 $(function () {
     $('#tanggal').daterangepicker({
@@ -87,7 +88,7 @@ $(function () {
                     $('#btnDeleteTanggal').remove();
                     html = '';
                     html += ' <div class="btn-group btn-group-xs" role="group" id="tglKertasKerja' + data.data.id + '">';
-                    html += '<a href="' + window.location.origin + '/sb/t/' + data.data.sd_tahun_id + '/kertas-kerja/d/' + data.data.id + '/list' + '" class="btn btn-xs btn-outline-dark btn-kertas-kerja" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</a>';
+                    html += '<a href="' + window.location.origin + '/sb/t/' + data.data.sd_tahun_id + '/kertas-kerja/'+jenisPembahasan+'/d/' + data.data.id + '/list' + '" class="btn btn-xs btn-outline-dark btn-kertas-kerja" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</a>';
                     html += '<button type="button" class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal" data-tanggal-id="' + data.data.id + '" onclick="deleteTanggalKertasKerja(' + data.data.id + ')"><i class="fa fa-times"></i></button>';
                     html += '</div>';
 

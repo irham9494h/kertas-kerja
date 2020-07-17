@@ -20,6 +20,7 @@ let activeTab = 'pendapatan';
 let totalPendapatan = 0;
 let totalBelanja = 0;
 let totalPembiayaan = 0;
+let jenisPembahasan = $('#jenisPembahasan').val();
 
 $(function () {
     $('#tanggal').daterangepicker({
@@ -62,14 +63,232 @@ $(function () {
     });
 
     $('#opdPendapatan').select2();
-    $('#rekeningPendapatan').select2();
+
+    $('#rekeningPendapatan').select2({
+        minimumInputLength: 1,
+        allowClear: false,
+        placeholder: 'Nama rekening',
+        ajax: {
+            dataType: 'json',
+            url: window.location.origin + '/sb/t/kertas-kerja/rekening-pendapatan',
+            delay: 1000,
+            data: function (params) {
+                return {
+                    nama_rekening: params.term
+                }
+            },
+            processResults: function (data, page) {
+                var arr = [];
+                $.each(data, function (i, value) {
+                    arr.push({
+                        id: value.id,
+                        text: value.obyek.jenis.kelompok.akun.kode + '.' + value.obyek.jenis.kelompok.kode + '.' + value.obyek.jenis.kode + '.' + value.obyek.kode + '.' + value.kode + '. ' + value.nama_rincian_obyek
+                    });
+                });
+                return {
+                    results: arr
+                };
+            }
+        },
+        language: {
+            noResults: function (params) {
+                return "Rekening tidak ditemukan.";
+            },
+            searching: function () {
+                return "Mencari...";
+            },
+        },
+    }).on('select2:select', function (evt) {
+        var data = $("#rekeningPendapatan option:selected").val();
+    });
+
     $('#opdBelanja').select2();
-    $('#rekeningBelanja').select2();
-    $('#rekeningSumberDana').select2();
+    $('#rekeningBelanja').select2({
+        minimumInputLength: 1,
+        allowClear: false,
+        placeholder: 'Nama rekening',
+        ajax: {
+            dataType: 'json',
+            url: window.location.origin + '/sb/t/kertas-kerja/rekening-belanja',
+            delay: 1000,
+            data: function (params) {
+                return {
+                    nama_rekening: params.term
+                }
+            },
+            processResults: function (data, page) {
+                var arr = [];
+                $.each(data, function (i, value) {
+                    arr.push({
+                        id: value.id,
+                        text: value.obyek.jenis.kelompok.akun.kode + '.' + value.obyek.jenis.kelompok.kode + '.' + value.obyek.jenis.kode + '.' + value.obyek.kode + '.' + value.kode + '. ' + value.nama_rincian_obyek
+                    });
+                });
+                return {
+                    results: arr
+                };
+            }
+        },
+        language: {
+            noResults: function (params) {
+                return "Rekening tidak ditemukan.";
+            },
+            searching: function () {
+                return "Mencari...";
+            },
+        },
+    }).on('select2:select', function (evt) {
+        var data = $("#rekeningPendapatan option:selected").val();
+    });
+    $('#rekeningSumberDana').select2({
+        minimumInputLength: 1,
+        allowClear: false,
+        placeholder: 'Nama rekening',
+        ajax: {
+            dataType: 'json',
+            url: window.location.origin + '/sb/t/kertas-kerja/rekening-pendapatan',
+            delay: 1000,
+            data: function (params) {
+                return {
+                    nama_rekening: params.term
+                }
+            },
+            processResults: function (data, page) {
+                var arr = [];
+                $.each(data, function (i, value) {
+                    arr.push({
+                        id: value.id,
+                        text: value.obyek.jenis.kelompok.akun.kode + '.' + value.obyek.jenis.kelompok.kode + '.' + value.obyek.jenis.kode + '.' + value.obyek.kode + '.' + value.kode + '. ' + value.nama_rincian_obyek
+                    });
+                });
+                return {
+                    results: arr
+                };
+            }
+        },
+        language: {
+            noResults: function (params) {
+                return "Rekening tidak ditemukan.";
+            },
+            searching: function () {
+                return "Mencari...";
+            },
+        },
+    }).on('select2:select', function (evt) {
+        var data = $("#rekeningPendapatan option:selected").val();
+    });
     $('#opdPembiayaan').select2();
-    $('#rekeningPembiayaan').select2();
-    $('#rekeningBelanjaPembiayaan').select2();
-    $('#updateModalRekeningBelanjaPembiayaan').select2();
+    $('#rekeningPembiayaan').select2({
+        minimumInputLength: 1,
+        allowClear: false,
+        placeholder: 'Nama rekening',
+        ajax: {
+            dataType: 'json',
+            url: window.location.origin + '/sb/t/kertas-kerja/rekening-pembiayaan',
+            delay: 1000,
+            data: function (params) {
+                return {
+                    nama_rekening: params.term
+                }
+            },
+            processResults: function (data, page) {
+                var arr = [];
+                $.each(data, function (i, value) {
+                    arr.push({
+                        id: value.id,
+                        text: value.obyek.jenis.kelompok.akun.kode + '.' + value.obyek.jenis.kelompok.kode + '.' + value.obyek.jenis.kode + '.' + value.obyek.kode + '.' + value.kode + '. ' + value.nama_rincian_obyek
+                    });
+                });
+                return {
+                    results: arr
+                };
+            }
+        },
+        language: {
+            noResults: function (params) {
+                return "Rekening tidak ditemukan.";
+            },
+            searching: function () {
+                return "Mencari...";
+            },
+        },
+    }).on('select2:select', function (evt) {
+        var data = $("#rekeningPendapatan option:selected").val();
+    });
+    $('#rekeningBelanjaPembiayaan').select2({
+        minimumInputLength: 1,
+        allowClear: false,
+        placeholder: 'Nama rekening',
+        ajax: {
+            dataType: 'json',
+            url: window.location.origin + '/sb/t/kertas-kerja/rekening-pembiayaan',
+            delay: 1000,
+            data: function (params) {
+                return {
+                    nama_rekening: params.term
+                }
+            },
+            processResults: function (data, page) {
+                var arr = [];
+                $.each(data, function (i, value) {
+                    arr.push({
+                        id: value.id,
+                        text: value.obyek.jenis.kelompok.akun.kode + '.' + value.obyek.jenis.kelompok.kode + '.' + value.obyek.jenis.kode + '.' + value.obyek.kode + '.' + value.kode + '. ' + value.nama_rincian_obyek
+                    });
+                });
+                return {
+                    results: arr
+                };
+            }
+        },
+        language: {
+            noResults: function (params) {
+                return "Rekening tidak ditemukan.";
+            },
+            searching: function () {
+                return "Mencari...";
+            },
+        },
+    }).on('select2:select', function (evt) {
+        var data = $("#rekeningPendapatan option:selected").val();
+    });
+    $('#updateModalRekeningBelanjaPembiayaan').select2({
+        minimumInputLength: 1,
+        allowClear: false,
+        placeholder: 'Nama rekening',
+        ajax: {
+            dataType: 'json',
+            url: window.location.origin + '/sb/t/kertas-kerja/rekening-pembiayaan',
+            delay: 1000,
+            data: function (params) {
+                return {
+                    nama_rekening: params.term
+                }
+            },
+            processResults: function (data, page) {
+                var arr = [];
+                $.each(data, function (i, value) {
+                    arr.push({
+                        id: value.id,
+                        text: value.obyek.jenis.kelompok.akun.kode + '.' + value.obyek.jenis.kelompok.kode + '.' + value.obyek.jenis.kode + '.' + value.obyek.kode + '.' + value.kode + '. ' + value.nama_rincian_obyek
+                    });
+                });
+                return {
+                    results: arr
+                };
+            }
+        },
+        language: {
+            noResults: function (params) {
+                return "Rekening tidak ditemukan.";
+            },
+            searching: function () {
+                return "Mencari...";
+            },
+        },
+    }).on('select2:select', function (evt) {
+        var data = $("#rekeningPendapatan option:selected").val();
+    });
 
     $.ajaxSetup({
         headers: {
@@ -139,12 +358,11 @@ $(function () {
             dataType: 'json',
             data: $('#formTanggal').serialize(),
             success: function (data) {
-                // console.log(data)
                 if (data.status) {
                     $('#btnDeleteTanggal').remove();
                     html = '';
                     html += ' <div class="btn-group btn-group-xs" role="group" id="tglKertasKerja' + data.data.id + '">';
-                    html += '<a href="' + window.location.origin + '/sb/t/' + data.data.sd_tahun_id + '/kertas-kerja/d/' + data.data.id + '/list' + '" class="btn btn-xs btn-outline-dark btn-kertas-kerja" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</a>';
+                    html += '<a href="' + window.location.origin + '/sb/t/' + data.data.sd_tahun_id + '/kertas-kerja/' + jenisPembahasan + '/d/' + data.data.id + '/list' + '" class="btn btn-xs btn-outline-dark btn-kertas-kerja" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</a>';
                     html += '<button type="button" class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal" data-tanggal-id="' + data.data.id + '" onclick="deleteTanggalKertasKerja(' + data.data.id + ')"><i class="fa fa-times"></i></button>';
                     html += '</div>';
 
@@ -268,7 +486,6 @@ function fetchKertasKerja(tanggalId) {
         url: pendapatanUrl + tanggalId + '/list/json',
         dataType: 'json',
         success: function (data) {
-            // console.log(data)
             $('#itemKertasKerjaLoader').html('');
             var html = '';
             var opd = '';
@@ -335,7 +552,6 @@ $('#btnSimpanItemPendapatan').on('click', function (e) {
         data: $('#formItemPendapatan').serialize(),
         success: function (data) {
             var html = '';
-            // console.log(data)
             if (data.status) {
                 if ($('#pendapatanContentTable').children().length > 0) {
                     if ($('#opd' + data.data.unit_id).children().length > 0) {
@@ -419,6 +635,18 @@ function editItemBelanja(id, nominal, pembiayaan_id, nilai_pembiayaan, e) {
     $('#updateModalNilaiWarning').hide();
     $('#updateModalPembiayaanWarning').hide();
 
+    $.ajax({
+        type: 'GET',
+        url: window.location.origin + '/sb/t/kertas-kerja/rekening-pembiayaan/' + pembiayaan_id,
+        dataType: 'json',
+        success: function (data) {
+            var html = '';
+            html = '<option value="' + data.id + '">' + data.obyek.jenis.kelompok.akun.kode + '.' + data.obyek.jenis.kelompok.kode + '.' + data.obyek.jenis.kode + '.' + data.obyek.kode + '.' + data.kode + '. ' + data.nama_rincian_obyek + '</option>';
+
+            $('#updateModalRekeningBelanjaPembiayaan').html(html);
+        }
+    });
+
     $('#updateModalRekeningBelanjaPembiayaan').val(pembiayaan_id).trigger('change');
 
     if (pembiayaan_id !== null) {
@@ -478,10 +706,8 @@ $('#newNominal').keyup(function () {
         }
 
         if (nilaiBaru > nilaiLama) {
-            // console.log('lebih besar')
             selisihNilaiBelanja = nilaiBaru - nilaiLama;
             if ($('#UpdateModalpembiayaanCheckbox').is(":checked")) {
-                // console.log('pembiayaan tercentang')
                 if (selisihNilaiBelanja > totalPendapatan) {
                     if (selisihNilaiBelanja > totalPembiayaan) {
                         $('#updateModalPembiayaanWarning').show();
@@ -515,7 +741,7 @@ $('#newNominal').keyup(function () {
 
                         $('#UpdateModalpembiayaanCheckbox').removeAttr('disabled').attr('checked', true);
                         $('#updateModalRekeningBelanjaPembiayaan').removeAttr('disabled');
-                        $('#updateModalRekeningBelanjaPembiayaan').val( $('#updateModalRekeningBelanjaPembiayaan option:first-child').val()).trigger('change');
+                        $('#updateModalRekeningBelanjaPembiayaan').val($('#updateModalRekeningBelanjaPembiayaan option:first-child').val()).trigger('change');
 
                     }
                 } else {
@@ -524,7 +750,6 @@ $('#newNominal').keyup(function () {
                 }
             }
         } else {
-            // console.log('tidak lebih besar')
             selisihNilaiBelanja = nilaiLama - nilaiBaru;
 
             $('#updateModalNilaiWarning').hide();
@@ -600,8 +825,8 @@ $('#btnSimpanUbahNominal').on('click', function (e) {
             'sd_tanggal_id': $('#updateNominalTanggalId').val(),
             'total_pendapatan': $('#updateNominalTotalPendapatan').val(),
             'total_pembiayaan': $('#updateNominalTotalPembiayaan').val(),
-            'pembiayaan_checkbox' : checkbox,
-            'pembiayaan_id' : pembiayaanId,
+            'pembiayaan_checkbox': checkbox,
+            'pembiayaan_id': pembiayaanId,
         }
     } else if (activeTab === 'pembiayaan') {
         updateUrl = 'update-nominal-pembiayaan';
@@ -617,7 +842,6 @@ $('#btnSimpanUbahNominal').on('click', function (e) {
         dataType: 'json',
         data: data,
         success: function (data) {
-            // console.log(data)
             var oldTotal = 0;
             var selisih = 0;
             if (data.status) {
@@ -745,7 +969,6 @@ function fetchKertasKerjaBelanja(tanggalId) {
             var html = '';
             var opd = '';
             var total = 0;
-            // console.log(data)
             if (data.data.length > 0) {
                 opd = '';
                 for (i = 0; i < data.opd.length; i++) {
@@ -963,7 +1186,6 @@ function fetchKertasKerjaPembiayaan(tanggalId) {
             var html = '';
             var opd = '';
             var total = 0;
-            // console.log(data)
             if (data.data.length > 0) {
                 opd = '';
                 for (i = 0; i < data.opd.length; i++) {
@@ -986,7 +1208,7 @@ function fetchKertasKerjaPembiayaan(tanggalId) {
                     html += '<th>Nilai</th>';
                     html += '</tr>';
                     html += '</thead>';
-                    html += '<tbody id="tblOpd' + data.data[i].unit_id + '">';
+                    html += '<tbody id="tblOpdPembiayaan' + data.data[i].unit_id + '">';
                     for (j = 0; j < data.data[i].list_uraian.length; j++) {
                         html += '<tr>';
                         html += '<td style="width: 80%">' + data.data[i].list_uraian[j].uraian + '</td>';

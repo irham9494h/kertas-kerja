@@ -20,8 +20,8 @@ class BelanjaResource extends JsonResource
             'id' => $this->id,
             'unit_id' => $this->unit_id,
             'nama_unit' => $this->unit->nama_unit,
-            'jenis_id' => $this->jenis_id,
-            'nama_jenis' => $this->jenis->nama_jenis,
+            'rincian_obyek_id' => $this->rincian_obyek_id,
+            'nama_rincian_obyek' => $this->rincian_obyek->nama_rincian_obyek,
             'uraian' => $this->uraian,
             'nilai' => $this->nilai,
             'sumber_dana' => $this->sumber_dana,
@@ -31,7 +31,7 @@ class BelanjaResource extends JsonResource
 
         public function uraianBelanja($tgl_id, $unit_id)
     {
-        $pendapatan = KertasKerjaBelanja::with('jenis')
+        $pendapatan = KertasKerjaBelanja::with('rincian_obyek')
             ->where('unit_id', '=', $unit_id)
             ->where('sd_tanggal_id', '=', $tgl_id)
             ->get();

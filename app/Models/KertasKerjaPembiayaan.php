@@ -19,9 +19,9 @@ class KertasKerjaPembiayaan extends Model
         return $this->belongsTo(OrganisasiUnit::class, 'unit_id');
     }
 
-    public function jenis()
+    public function rincian_obyek()
     {
-        return $this->belongsTo(RekeningJenis::class, 'jenis_id');
+        return $this->belongsTo(RekeningRincianObyek::class, 'rincian_obyek_id');
     }
 
 }

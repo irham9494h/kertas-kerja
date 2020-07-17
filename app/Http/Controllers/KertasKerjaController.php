@@ -14,6 +14,7 @@ use App\Models\KertasKerjaPembiayaan;
 use App\Models\OrganisasiUnit;
 use App\Models\RekeningAkun;
 use App\Models\RekeningJenis;
+use App\Models\RekeningRincianObyek;
 use App\Models\TahunRekening;
 use App\Models\TahunSumberDana;
 use App\Models\TanggalSumberDana;
@@ -23,7 +24,8 @@ use Illuminate\Support\Facades\Validator;
 class KertasKerjaController extends AppController
 {
 
-    public function rek(){
+    public function rek()
+    {
         $rekPendapatans = RekeningJenis::join('rek_kelompok', 'rek_kelompok.id', 'rek_jenis.kelompok_id')
             ->join('rek_akun', 'rek_akun.id', 'rek_kelompok.akun_id')
             ->where('rek_akun.alias', '=', 'pendapatan')
@@ -86,7 +88,14 @@ class KertasKerjaController extends AppController
 
     public function tanggalKertasKerja($tahun_id, $pembahasan)
     {
-        $tahun = TahunSumberDana::where('id', '=', $tahun_id)->firstOrFail();
+        $jenisPembahasan = $pembahasan == 'murni' ? 'struktur_murni' : 'struktur_perubahan';
+
+        $tahun = TahunSumberDana::with('tanggal')
+            ->whereHas('tanggal', function ($q) use ($jenisPembahasan) {
+                $q->where('jenis_pembahasan', '=', $jenisPembahasan);
+            })
+            ->where('id', '=', $tahun_id)
+            ->firstOrFail();
         $tanggal = TanggalSumberDana::where('sd_tahun_id', '=', $tahun_id);
 
         if ($pembahasan == 'murni') {
@@ -98,38 +107,89 @@ class KertasKerjaController extends AppController
         }
         $tanggal_kertas_kerja = $tanggal->get();
 
-        return view('kertas-kerja.kertas-kerja', compact('tahun', 'tanggal_kertas_kerja', 'title'));
+        return view('kertas-kerja.kertas-kerja', compact('tahun', 'tanggal_kertas_kerja', 'title', 'pembahasan'));
     }
     /*
      * Akhir tanggal kertas kerja
      */
 
     /*
-     * Pendapatan ------------------------------------------------------------------------------------------------------
+     * Rekening
      */
-    public function fetchKertasKerja($tahun_id, $tanggal_id, $pembahasan)
+    public function tahunRekeningAktif()
     {
         $tahunRek = TahunRekening::where('status', '=', 1)->firstOrFail();
-        $tahun = TahunSumberDana::with('tanggal')->where('id', '=', $tahun_id)->first();
+        return $tahunRek;
+    }
+
+    public function rekeningPendapatan(Request $request)
+    {
+        $rekPendapatans = RekeningRincianObyek::with('obyek.jenis.kelompok.akun')
+            ->whereHas('obyek.jenis.kelompok.akun', function ($q) {
+                $q->where('alias', '=', 'pendapatan')
+                    ->where('rek_akun.tahun_rekening_id', '=', $this->tahunRekeningAktif()->id);
+            })
+            ->where('nama_rincian_obyek', 'like', '%' . $request->nama_rekening . '%')
+            ->get();
+        return response()->json($rekPendapatans);
+    }
+
+    public function rekeningBelanja(Request $request)
+    {
+        $rekeningBelanjas = RekeningRincianObyek::with('obyek.jenis.kelompok.akun')
+            ->whereHas('obyek.jenis.kelompok.akun', function ($q) {
+                $q->where('alias', '=', 'belanja')
+                    ->where('rek_akun.tahun_rekening_id', '=', $this->tahunRekeningAktif()->id);
+            })
+            ->where('nama_rincian_obyek', 'like', '%' . $request->nama_rekening . '%')
+            ->get();
+        return response()->json($rekeningBelanjas);
+    }
+
+
+    public function rekeningPembiayaan(Request $request, $id = null)
+    {
+        if ($id == null) {
+            $rekPendapatans = RekeningRincianObyek::with('obyek.jenis.kelompok.akun')
+                ->whereHas('obyek.jenis.kelompok.akun', function ($q) {
+                    $q->where('alias', '=', 'pembiayaan')
+                        ->where('rek_akun.tahun_rekening_id', '=', $this->tahunRekeningAktif()->id);
+                })
+                ->where('nama_rincian_obyek', 'like', '%' . $request->nama_rekening . '%')
+                ->get();
+        } else {
+            $rekPendapatans = RekeningRincianObyek::with('obyek.jenis.kelompok.akun')
+                ->whereHas('obyek.jenis.kelompok.akun', function ($q) {
+                    $q->where('alias', '=', 'pembiayaan')
+                        ->where('rek_akun.tahun_rekening_id', '=', $this->tahunRekeningAktif()->id);
+                })
+                ->where('id', '=', $id)
+                ->firstOrFail();
+        }
+
+        return response()->json($rekPendapatans);
+    }
+
+
+    /*
+     * Pendapatan ------------------------------------------------------------------------------------------------------
+     */
+    public function fetchKertasKerja($tahun_id, $pembahasan, $tanggal_id)
+    {
+        $jenisPembahasan = $pembahasan == 'murni' ? 'struktur_murni' : 'struktur_perubahan';
+
+        $tahunRek = TahunRekening::where('status', '=', 1)->firstOrFail();
+        $tahun = TahunSumberDana::with([
+            'tanggal' => function ($q) use ($jenisPembahasan) {
+                $q->where('jenis_pembahasan', '=', $jenisPembahasan);
+            }
+        ])
+            ->whereHas('tanggal', function ($q) use ($jenisPembahasan) {
+                $q->where('jenis_pembahasan', '=', $jenisPembahasan);
+            })
+            ->where('id', '=', $tahun_id)->first();
+
         $opds = OrganisasiUnit::with('bidang.urusan')->get();
-        $rekPendapatans = RekeningJenis::join('rek_kelompok', 'rek_kelompok.id', 'rek_jenis.kelompok_id')
-            ->join('rek_akun', 'rek_akun.id', 'rek_kelompok.akun_id')
-            ->where('rek_akun.alias', '=', 'pendapatan')
-            ->where('rek_akun.tahun_rekening_id', '=', $tahunRek->id)
-            ->select('rek_akun.kode as kode_akun', 'rek_kelompok.kode as kode_kelompok', 'rek_jenis.*')
-            ->get();
-        $rekBelanjas = RekeningJenis::join('rek_kelompok', 'rek_kelompok.id', 'rek_jenis.kelompok_id')
-            ->join('rek_akun', 'rek_akun.id', 'rek_kelompok.akun_id')
-            ->where('rek_akun.alias', '=', 'belanja')
-            ->where('rek_akun.tahun_rekening_id', '=', $tahunRek->id)
-            ->select('rek_akun.kode as kode_akun', 'rek_kelompok.kode as kode_kelompok', 'rek_jenis.*')
-            ->get();
-        $rekPembiayaans = RekeningJenis::join('rek_kelompok', 'rek_kelompok.id', 'rek_jenis.kelompok_id')
-            ->join('rek_akun', 'rek_akun.id', 'rek_kelompok.akun_id')
-            ->where('rek_akun.alias', '=', 'pembiayaan')
-            ->where('rek_akun.tahun_rekening_id', '=', $tahunRek->id)
-            ->select('rek_akun.kode as kode_akun', 'rek_kelompok.kode as kode_kelompok', 'rek_jenis.*')
-            ->get();
 
         if ($pembahasan == 'murni') {
             $title = 'Pembahasan Struktur Murni Tahun ' . $tahun->tahun;
@@ -142,7 +202,7 @@ class KertasKerjaController extends AppController
             ->groupBy('unit_id')->get();
 
         return view('kertas-kerja.kertas-kerja-item', compact('tahun', 'opds', 'pendapatans', 'tanggal_id',
-            'rekPendapatans', 'rekBelanjas', 'rekPembiayaans', 'title'));
+            'pembahasan', 'title'));
     }
 
     public function fetchPendapatanJson($tgl_id)
@@ -161,12 +221,12 @@ class KertasKerjaController extends AppController
     public function storePendapatan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'jenis_id' => 'required',
+            'rincian_obyek_id' => 'required',
             'nilai' => 'required',
             'unit_id' => 'required',
             'uraian' => 'required',
         ], [
-            'jenis_id.required' => 'Anda belum memilih rekening.',
+            'rincian_obyek_id.required' => 'Anda belum memilih rekening.',
             'nilai.required' => 'Nilai pendapatan tidak boleh kosong.',
             'unit_id.required' => 'Anda belum memilih OPD.',
             'uraian.required' => 'uraian tidak boleh kosong.',
@@ -243,12 +303,12 @@ class KertasKerjaController extends AppController
         $data = [];
 
         $validator = Validator::make($request->all(), [
-            'jenis_id' => 'required',
+            'rincian_obyek_id' => 'required',
             'nilai_belanja' => 'required',
             'unit_id' => 'required',
             'uraian_belanja' => 'required',
         ], [
-            'jenis_id.required' => 'Anda belum memilih rekening.',
+            'rincian_obyek_id.required' => 'Anda belum memilih rekening.',
             'nilai_belanja.required' => 'Nilai pendapatan tidak boleh kosong.',
             'unit_id.required' => 'Anda belum memilih OPD.',
             'uraian_belanja.required' => 'uraian tidak boleh kosong.',
@@ -261,7 +321,7 @@ class KertasKerjaController extends AppController
         if ($request->has('pembiayaan_checkbox')) {
             $nilai_pembiayaan = $request->nilai_belanja - $request->total_pendapatan;
             $data = [
-                'jenis_id' => $request->jenis_id,
+                'rincian_obyek_id' => $request->rincian_obyek_id,
                 'nilai' => $request->nilai_belanja,
                 'nilai_pembiayaan' => $nilai_pembiayaan,
                 'pembiayaan_id' => $request->pembiayaan_id,
@@ -272,7 +332,7 @@ class KertasKerjaController extends AppController
             ];
         } else {
             $data = [
-                'jenis_id' => $request->jenis_id,
+                'rincian_obyek_id' => $request->rincian_obyek_id,
                 'nilai' => $request->nilai_belanja,
                 'pendapatan_id' => $request->pendapatan_id,
                 'sd_tanggal_id' => $request->sd_tanggal_id,
@@ -399,12 +459,12 @@ class KertasKerjaController extends AppController
     public function storePembiayaan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'jenis_id' => 'required',
+            'rincian_obyek_id' => 'required',
             'nilai' => 'required',
             'unit_id' => 'required',
             'uraian' => 'required',
         ], [
-            'jenis_id.required' => 'Anda belum memilih rekening.',
+            'rincian_obyek_id.required' => 'Anda belum memilih rekening.',
             'nilai.required' => 'Nilai pendapatan tidak boleh kosong.',
             'unit_id.required' => 'Anda belum memilih OPD.',
             'uraian.required' => 'uraian tidak boleh kosong.',

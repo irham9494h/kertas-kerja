@@ -108,11 +108,11 @@
                                 <div class="btn-group btn-group-xs btn-kertas-kerja-g" role="group"
                                      id="tglKertasKerja{{$tanggal->id}}" data-tanggal-id="{{$tanggal->id}}">
                                     @if($tanggal->jenis_pembahasan == 'struktur_murni')
-                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, $tanggal->id, 'murni'])}}"
+                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, 'murni', $tanggal->id])}}"
                                            class="btn btn-xs btn-kertas-kerja {{$tanggal->id == $tanggal_id ? 'btn-dark' :'btn-outline-dark'}}"
                                            id="btnFetchKertasKerja{{$tanggal->id}}">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
                                     @else
-                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, $tanggal->id, 'peruhbahan'])}}"
+                                        <a href="{{route('sb-tahun.fetch-kertas-kerja', [$tahun->id, 'peruhbahan', $tanggal->id])}}"
                                            class="btn btn-xs btn-kertas-kerja {{$tanggal->id == $tanggal_id ? 'btn-dark' :'btn-outline-dark'}}"
                                            id="btnFetchKertasKerja{{$tanggal->id}}">{{date('d/m/Y', strtotime($tanggal->tanggal))}}</a>
                                     @endif
@@ -222,6 +222,7 @@
                     <div class="modal-body">
                         @csrf
                         <input type="hidden" id="tahunId" name="sb_tahun_id">
+                        <input type="hidden" id="jenisPembahasan" name="jenis_pembahasan" value="{{$pembahasan}}">
                         <div class="form-group">
                             <label for="tanggal"><span class="text-danger">*</span>Tanggal Kertas Kerja</label>
                             <input type="text" class="form-control" name="tanggal" id="tanggal"
@@ -276,12 +277,12 @@
 
                         <div class="form-group">
                             <label for="rekeningPendapatan"><span class="text-danger">*</span>Rekening</label>
-                            <select name="jenis_id" id="rekeningPendapatan" class="form-control" style="width: 100%;">
-                                @foreach($rekPendapatans as $rek)
-                                    <option value="{{$rek->id}}">
-                                        {{$rek->kode_akun.'.'.$rek->kode_kelompok.'.'.$rek->kode.' '.$rek->nama_jenis}}
-                                    </option>
-                                @endforeach
+                            <select name="rincian_obyek_id" id="rekeningPendapatan" class="form-control" style="width: 100%;">
+{{--                                @foreach($rekPendapatans as $rek)--}}
+{{--                                    <option value="{{$rek->id}}">--}}
+{{--                                        {{$rek->kode_akun.'.'.$rek->kode_kelompok.'.'.$rek->kode.' '.$rek->nama_jenis}}--}}
+{{--                                    </option>--}}
+{{--                                @endforeach--}}
                             </select>
                             <div class="invalid-feedback" id="jenis_id_feedback">
                                 Please provide a valid city.
@@ -357,13 +358,8 @@
                             <div class="col">
                                 <div class="form-group">
                                     <label for="rekening"><span class="text-danger">*</span>Rekening</label>
-                                    <select name="jenis_id" id="rekeningBelanja" class="form-control"
+                                    <select name="rincian_obyek_id" id="rekeningBelanja" class="form-control"
                                             style="width: 100%;">
-                                        @foreach($rekBelanjas as $belanja)
-                                            <option value="{{$belanja->id}}">
-                                                {{$belanja->kode_akun.'.'.$belanja->kode_kelompok.'.'.$belanja->kode.' '.$belanja->nama_jenis}}
-                                            </option>
-                                        @endforeach
                                     </select>
                                     <div class="invalid-feedback" id="rekening_feedback">
                                         Please provide a valid city.
@@ -404,11 +400,6 @@
                                     <label for="rekening"><span class="text-danger">*</span>Sumber Dana</label>
                                     <select name="pendapatan_id" id="rekeningSumberDana" class="form-control"
                                             style="width: 100%;">
-                                        @foreach($rekPendapatans as $rek)
-                                            <option value="{{$rek->id}}">
-                                                {{$rek->kode_akun.'.'.$rek->kode_kelompok.'.'.$rek->kode.' '.$rek->nama_jenis}}
-                                            </option>
-                                        @endforeach
                                     </select>
                                     <div class="invalid-feedback" id="rekening_feedback">
                                         Please provide a valid city.
@@ -426,12 +417,6 @@
                         <div class="form-group" id="belanjaPembiayaan">
                             <select name="pembiayaan_id" id="rekeningBelanjaPembiayaan" class="form-control"
                                     style="width: 100%;" disabled>
-
-                                @foreach($rekPembiayaans as $pembiayaan)
-                                    <option value="{{$pembiayaan->id}}">
-                                        {{$pembiayaan->kode_akun.'.'.$pembiayaan->kode_kelompok.'.'.$pembiayaan->kode.' '.$pembiayaan->nama_jenis}}
-                                    </option>
-                                @endforeach
                             </select>
                             <span class="text-danger mt-1" id="pembiayaanWarning" style="display: none"><small>Nilai pembiayaan tidak mencukupi.</small></span>
                         </div>
@@ -479,13 +464,7 @@
                         </div>
                         <div class="form-group">
                             <label for="rekening"><span class="text-danger">*</span>Rekening</label>
-                            <select name="jenis_id" id="rekeningPembiayaan" class="form-control" style="width: 100%;">
-
-                                @foreach($rekPembiayaans as $pembiayaan)
-                                    <option value="{{$pembiayaan->id}}">
-                                        {{$pembiayaan->kode_akun.'.'.$pembiayaan->kode_kelompok.'.'.$pembiayaan->kode.' '.$pembiayaan->nama_jenis}}
-                                    </option>
-                                @endforeach
+                            <select name="rincian_obyek_id" id="rekeningPembiayaan" class="form-control" style="width: 100%;">
                             </select>
                             <div class="invalid-feedback" id="rekening_feedback">
                                 Please provide a valid city.
@@ -567,12 +546,6 @@
                         <div class="form-group" id="updateModalBelanjaPembiayaan" style="display:none;">
                             <select name="pembiayaan_id" id="updateModalRekeningBelanjaPembiayaan" class="form-control"
                                     style="width: 100%;" disabled>
-
-                                @foreach($rekPembiayaans as $pembiayaan)
-                                    <option value="{{$pembiayaan->id}}">
-                                        {{$pembiayaan->kode_akun.'.'.$pembiayaan->kode_kelompok.'.'.$pembiayaan->kode.' '.$pembiayaan->nama_jenis}}
-                                    </option>
-                                @endforeach
                             </select>
                             <span class="text-danger mt-1" id="updateModalPembiayaanWarning"
                                   style="display: none"><small>Nilai pembiayaan tidak mencukupi.</small></span>
@@ -620,7 +593,7 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/sb.min.js')}}"></script>
+    <script src="{{asset('app/sb.js')}}"></script>
     <script>
         $(function () {
             fetchKertasKerja('{{$tanggal_id}}')

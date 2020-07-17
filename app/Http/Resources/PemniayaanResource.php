@@ -20,8 +20,8 @@ class PemniayaanResource extends JsonResource
             'id' => $this->id,
             'unit_id' => $this->unit_id,
             'nama_unit' => $this->unit->nama_unit,
-            'jenis_id' => $this->jenis_id,
-            'nama_jenis' => $this->jenis->nama_jenis,
+            'rincian_obyek_id' => $this->rincian_obyek_id,
+            'nama_rincian_obyek' => $this->rincian_obyek->nama_rincian_obyek,
             'uraian' => $this->uraian,
             'nilai' => $this->nilai,
             'list_uraian' => $this->uraianPembiayaan($this->sd_tanggal_id, $this->unit_id)
@@ -30,7 +30,7 @@ class PemniayaanResource extends JsonResource
 
     public function uraianPembiayaan($tgl_id, $unit_id)
     {
-        $pembiayaan = KertasKerjaPembiayaan::with('jenis')
+        $pembiayaan = KertasKerjaPembiayaan::with('rincian_obyek')
             ->where('unit_id', '=', $unit_id)
             ->where('sd_tanggal_id', '=', $tgl_id)
             ->get();
