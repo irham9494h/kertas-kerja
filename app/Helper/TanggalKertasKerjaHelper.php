@@ -31,6 +31,7 @@ class TanggalKertasKerjaHelper
             ->orderBy('tanggal', 'desc')
             ->where('jenis_pembahasan', '=', $jenisPembahasan)
             ->count();
+
         if ($getLowerTanggal > 0)
             return false;
 

@@ -36,11 +36,15 @@ class TanggalKertasKerjaController extends AppController
             ->where('jenis_pembahasan', '=', $jenisPembahasan)
             ->count();
 
+//        return response()->json(TanggalKertasKerjaHelper::checkIfDateIsLowerThanOtherDate($request->all()));
+
         if ($count > 0) {
             if (TanggalKertasKerjaHelper::checkIfDateIsLowerThanOtherDate($request->all())) {
                 $latestDate = TanggalSumberDana::where('sd_tahun_id', '=', $request->sb_tahun_id)
+                    ->where('jenis_pembahasan', '=', $jenisPembahasan)
                     ->latest()->first();
-                $items = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $latestDate->id)
+
+                $pendapatan = KertasKerjaPendapatan::where('sd_tanggal_id', '=', $latestDate->id)
                     ->get();
 
                 $belanja = KertasKerjaBelanja::where('sd_tanggal_id', '=', $latestDate->id)
@@ -49,7 +53,7 @@ class TanggalKertasKerjaController extends AppController
                 $pembiayaan = KertasKerjaPembiayaan::where('sd_tanggal_id', '=', $latestDate->id)
                     ->get();
 
-                if (count($items) > 0) {
+                if (count($pendapatan) > 0) {
                     $data = [];
 
                     $tanggal = TanggalSumberDana::create([
@@ -58,7 +62,7 @@ class TanggalKertasKerjaController extends AppController
                         'jenis_pembahasan' => $jenisPembahasan
                     ]);
 
-                    foreach ($items as $item) {
+                    foreach ($pendapatan as $item) {
                         $data = [
                             'sd_tanggal_id' => $tanggal->id,
                             'unit_id' => $item->unit_id,

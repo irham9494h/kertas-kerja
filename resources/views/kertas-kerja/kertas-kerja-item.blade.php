@@ -77,7 +77,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{$title}}</h3>
+                        <h3 class="card-title">{{$title}} | <strong id="lockStatus">{{$tahun->status_murni == 0 ? 'Terbuka' : 'Terkunci'}}</strong></h3>
                         <div class="card-tools">
                             <a href="{{route('sb-tahun')}}" class="btn btn-outline-secondary btn-sm"><i
                                     class="fa fa-arrow-left"></i> Kembali
@@ -89,9 +89,20 @@
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
                                                 class="fa fa-bars"></i></button>
                                         <div class="dropdown-menu dropdown-menu-right">
-                                            <button class="dropdown-item" type="button" id="btnHapusKertasKerja"
+                                            <input type="hidden" value="{{$tahun->status_murni}}" id="statusMurni">
+
+                                            <button class="dropdown-item" type="button" id="btnKunciKertasKerja"
+                                                    data-pembahasan="struktur_murni"
                                                     data-id="{{$tahun->id}}"
-                                                    onclick="">Kunci Struktu Murni
+                                                    onclick="" style="display: {{$tahun->status_murni == 0 ? 'block' : 'none'}}">
+                                                <i class="fa fa-lock"></i> Kunci Struktur Murni
+                                            </button>
+
+                                            <button class="dropdown-item" type="button" id="btnBukaKertasKerja"
+                                                    data-pembahasan="struktur_murni"
+                                                    data-id="{{$tahun->id}}"
+                                                    onclick="" style="display: {{$tahun->status_murni == 1 ? 'block' : 'none'}}">
+                                                <i class="fa fa-lock-open"></i> Buka Struktur Murni
                                             </button>
                                         </div>
                                     </div>
@@ -593,7 +604,7 @@
 @endsection
 
 @section('script')
-    <script src="{{asset('app/sb.js')}}"></script>
+    <script src="{{asset('app/sb.min.js')}}"></script>
     <script>
         $(function () {
             fetchKertasKerja('{{$tanggal_id}}')

@@ -33,6 +33,7 @@
                             <thead class="bg-danger w-100">
                             <tr class="table-head">
                                 <th>Tahun</th>
+                                <th>Status</th>
                                 <th>Deskripsi</th>
                                 <th class="pull-right" style="width: 80px">Aksi</th>
                             </tr>
@@ -41,7 +42,20 @@
                             @if($tahuns->count() > 0)
                                 @foreach($tahuns as $tahun)
                                     <tr id="rowKertasKerja{{$tahun->id}}">
-                                        <td id="rowTahun{{$tahun->id}}">{{$tahun->tahun}}</td>
+                                        <td id="rowTahun{{$tahun->id}}">
+                                            {{$tahun->tahun}}
+                                        </td>
+
+                                        @if($tahun->status_murni == 0)
+                                            <td id="rowStatus{{$tahun->id}}">
+                                                <span class="badge badge-info">Terbuka</span>
+                                            </td>
+                                        @else
+                                            <td id="rowStatus{{$tahun->id}}">
+                                                <span class="badge badge-warning">Terkunci</span>
+                                            </td>
+                                        @endif
+
                                         @if ($tahun->deskripsi !== null)
                                             <td id="rowDeskripsi{{$tahun->id}}">{{$tahun->deskripsi}}</td>
                                         @else
@@ -49,6 +63,8 @@
                                         @endif
                                         <td>
                                             <div class="btn-group btn-group-xs">
+                                                <input type="hidden" value="{{$tahun->status_murni}}" id="statusMurni">
+
                                                 <button class="btn btn-outline-primary btn-xs dropdown-toggle"
                                                         type="button"
                                                         data-toggle="dropdown" aria-haspopup="true"

@@ -17,6 +17,7 @@ let oldNominal = 0;
 let tanggalKertasKerja = 0;
 let tanggalIDKertasKerja = 0;
 let jenisPembahasan = $('#jenisPembahasan').val();
+const lockWarningMessage = 'STRUKTUR TERKUNCI, Anda tidak dapat menambah ataupun mengubah struktur.';
 
 $(function () {
     $('#tanggal').daterangepicker({
@@ -66,6 +67,11 @@ $(function () {
 
     $('#btnTambahSbTanggal').on('click', function (e) {
         e.preventDefault();
+        if ($('#statusMurni').val() == 1) {
+            warningSwal(lockWarningMessage)
+            return false;
+        }
+
         $('#modalFormTanggal').text('Form Tambah Kertas Kerja');
         $('#btnSimpanTanggal').show();
         $('#btnSimpanUbahTanggal').hide();
@@ -88,7 +94,7 @@ $(function () {
                     $('#btnDeleteTanggal').remove();
                     html = '';
                     html += ' <div class="btn-group btn-group-xs" role="group" id="tglKertasKerja' + data.data.id + '">';
-                    html += '<a href="' + window.location.origin + '/sb/t/' + data.data.sd_tahun_id + '/kertas-kerja/'+jenisPembahasan+'/d/' + data.data.id + '/list' + '" class="btn btn-xs btn-outline-dark btn-kertas-kerja" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</a>';
+                    html += '<a href="' + window.location.origin + '/sb/t/' + data.data.sd_tahun_id + '/kertas-kerja/' + jenisPembahasan + '/d/' + data.data.id + '/list' + '" class="btn btn-xs btn-outline-dark btn-kertas-kerja" id="btnFetchKertasKerja' + data.data.id + '">' + myDateFormat(data.data.tanggal) + '</a>';
                     html += '<button type="button" class="btn btn-xs btn-outline-danger" id="btnDeleteTanggal" data-tanggal-id="' + data.data.id + '" onclick="deleteTanggalKertasKerja(' + data.data.id + ')"><i class="fa fa-times"></i></button>';
                     html += '</div>';
 
@@ -125,6 +131,14 @@ function errorSwal(message) {
     );
 }
 
+function warningSwal(message) {
+    return Swal.fire(
+        'Peringatan!',
+        message,
+        'warning'
+    );
+}
+
 function showError(error, form) {
     $.each(error, function (key, value) {
         $('#' + form).find($('input[name=' + key + ']')).addClass('is-invalid');
@@ -151,6 +165,11 @@ function formatRupiah(angka) {
 }
 
 function deleteTanggalKertasKerja(id) {
+    if ($('#statusMurni').val() == 1) {
+        warningSwal(lockWarningMessage)
+        return false;
+    }
+
     Swal.fire(confirmDelete).then((result) => {
         if (result.value) {
             $.ajax({
@@ -171,4 +190,40 @@ function deleteTanggalKertasKerja(id) {
     })
 }
 
+/*
+Kinci dan Buka Kertas Kerja
+ */
 
+$('#btnKunciKertasKerja').on('click', function (event) {
+    $.ajax({
+        type: 'GET',
+        url: window.location.origin + '/sb/t/kertas-kerja/kunci-struktur-murni/' + $(this).data('id'),
+        dataType: 'json',
+        success: function (data) {
+            if (data.status) {
+                $('#btnKunciKertasKerja').hide();
+                $('#btnBukaKertasKerja').show();
+                $('#statusMurni').val(1)
+                $('#lockStatus').text('Terkunci')
+                successSwal(data.message)
+            }
+        }
+    });
+})
+
+$('#btnBukaKertasKerja').on('click', function (event) {
+    $.ajax({
+        type: 'GET',
+        url: window.location.origin + '/sb/t/kertas-kerja/buka-struktur-murni/' + $(this).data('id'),
+        dataType: 'json',
+        success: function (data) {
+            if (data.status) {
+                $('#btnBukaKertasKerja').hide();
+                $('#btnKunciKertasKerja').show();
+                $('#statusMurni').val(0)
+                $('#lockStatus').text('Terbuka')
+                successSwal(data.message)
+            }
+        }
+    });
+})

@@ -10,6 +10,7 @@ const confirmDelete = {
     cancelButtonText: 'Tidak, batal hapus!',
     reverseButtons: true
 };
+const lockWarningMessage = 'STRUKTUR MURNI SUDAH TERKUNCI, Anda tidak dapat menghapus tahun pembahasan.';
 
 $(function () {
 
@@ -65,6 +66,14 @@ function showError(error, form) {
     });
 }
 
+function warningSwal(message) {
+    return Swal.fire(
+        'Peringatan!',
+        message,
+        'warning'
+    );
+}
+
 function fecthTahun() {
     $.ajax({
         type: 'GET',
@@ -76,6 +85,13 @@ function fecthTahun() {
                 for (var i = 0; i < data.data.length; i++) {
                     html += '<tr id="rowKertasKerja' + data.data[i].id + '">';
                     html += '<td id="rowTahun' + data.data[i].id + '">' + data.data[i].tahun + '</td>';
+
+                    if (data.data[i].status_murni == 0) {
+                        html += '<td id="rowStatus' + data.data[i].id + '"><span class="badge badge-info">Terbuka</span></td>';
+                    } else {
+                        html += '<td id="rowStatus' + data.data[i].id + '"><span class="badge badge-warning">Terkunci</span></td>';
+                    }
+
                     if (data.data[i].deskripsi !== null) {
                         html += '<td id="rowDeskripsi' + data.data[i].id + '">' + data.data[i].deskripsi + '</td>';
                     } else {
@@ -101,6 +117,11 @@ function fecthTahun() {
 }
 
 function deleteKertasKerja(id) {
+    if ($('#statusMurni').val() == 1) {
+        warningSwal(lockWarningMessage)
+        return false;
+    }
+
     Swal.fire(confirmDelete).then((result) => {
         if (result.value) {
             $.ajax({

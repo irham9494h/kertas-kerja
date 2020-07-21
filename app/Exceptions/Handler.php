@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\ValidationException;
@@ -58,6 +59,10 @@ class Handler extends ExceptionHandler
     {
         if ($exception instanceof AuthorizationException) {
             return response()->json(['error' => 'Anda tidak memiliki izin mengakses URL.'], 403);
+        }
+
+        if ($exception instanceof NotFoundHttpException or $exception instanceof ModelNotFoundException) {
+            return response()->view('errors.not-found', [], 404);
         }
 
         return parent::render($request, $exception);

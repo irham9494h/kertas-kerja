@@ -91,18 +91,15 @@ class KertasKerjaController extends AppController
         $jenisPembahasan = $pembahasan == 'murni' ? 'struktur_murni' : 'struktur_perubahan';
 
         $tahun = TahunSumberDana::with('tanggal')
-            ->whereHas('tanggal', function ($q) use ($jenisPembahasan) {
-                $q->where('jenis_pembahasan', '=', $jenisPembahasan);
-            })
             ->where('id', '=', $tahun_id)
             ->firstOrFail();
-        $tanggal = TanggalSumberDana::where('sd_tahun_id', '=', $tahun_id);
 
+        $tanggal = TanggalSumberDana::where('sd_tahun_id', '=', $tahun_id);
         if ($pembahasan == 'murni') {
-            $tanggal->where('jenis_pembahasan', '=', 'struktur_murni');
+            $tanggal->where('jenis_pembahasan', '=', $jenisPembahasan);
             $title = 'Pembahasan Struktur Murni Tahun ' . $tahun->tahun;
         } else {
-            $tanggal->where('jenis_pembahasan', '=', 'struktur_perubahan');
+            $tanggal->where('jenis_pembahasan', '=', $jenisPembahasan);
             $title = 'Pembahasan Struktur Perubahan Tahun ' . $tahun->tahun;
         }
         $tanggal_kertas_kerja = $tanggal->get();
@@ -515,5 +512,34 @@ class KertasKerjaController extends AppController
     /*
      * End of pembiayaan -----------------------------------------------------------------------------------------------
      */
+
+    /*
+     * Kunci Struktur Murni --------------------------------------------------------------------------------------------
+     */
+
+    public function kunciStrukturMurni($tahunSumberDanaId)
+    {
+        $sumberDana = TahunSumberDana::findOrFail($tahunSumberDanaId);
+
+        $sumberDana->status_murni = TahunSumberDana::strukturMurniFix();
+        $sumberDana->save();
+
+        return response()->json(['status' => true, 'message' => 'Berhasil mengunci struktur murni.'], 200);
+    }
+
+    public function bukaStrukturMurni($tahunSumberDanaId)
+    {
+        $sumberDana = TahunSumberDana::findOrFail($tahunSumberDanaId);
+
+        $sumberDana->status_murni = TahunSumberDana::pembahasanStrukturMurni();
+        $sumberDana->save();
+
+        return response()->json(['status' => true, 'message' => 'Berhasil membuka struktur murni.'], 200);
+    }
+
+    /*
+     * End of Kunci Struktur Murni
+     */
+
 
 }

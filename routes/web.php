@@ -145,6 +145,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/t/kertas-kerja/rekening-belanja', 'KertasKerjaController@rekeningBelanja');
         Route::get('/t/kertas-kerja/rekening-pembiayaan/{id?}', 'KertasKerjaController@rekeningPembiayaan');
 
+        Route::get('/t/kertas-kerja/kunci-struktur-murni/{tahun_id?}', 'KertasKerjaController@kunciStrukturMurni');
+        Route::get('/t/kertas-kerja/buka-struktur-murni/{tahun_id?}', 'KertasKerjaController@bukaStrukturMurni');
+
         Route::get('/t', 'KertasKerjaController@tahunSumberDana')->name('sb-tahun');
         Route::get('/t/fetch-tahun', 'KertasKerjaController@fetchTahun')->name('sb-tahun.fetch');
         Route::post('/t/store', 'KertasKerjaController@storeTahun')->name('sb-tahun.store');
