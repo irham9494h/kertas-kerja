@@ -99,6 +99,7 @@ function fecthTahun() {
                     }
                     html += '<td>';
                     html += '<div class="btn-group btn-group-xs">';
+                    html += '<input type="hidden" value="' + data.data[i].status_murni + '" id="statusMurni' + data.data[i].id + '">';
                     html += '<button class="btn btn-outline-primary btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-bars"></i></button>';
                     html += '<div class="dropdown-menu dropdown-menu-right">';
                     html += '<a href="' + sbThnUrl + data.data[i].id + '/kertas-kerja/murni" class="dropdown-item" type="button">Struktur Murni</a>';
@@ -117,7 +118,7 @@ function fecthTahun() {
 }
 
 function deleteKertasKerja(id) {
-    if ($('#statusMurni').val() == 1) {
+    if ($('#statusMurni' + id).val() == 1) {
         warningSwal(lockWarningMessage)
         return false;
     }

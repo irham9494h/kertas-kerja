@@ -50,6 +50,7 @@
                                 Rekening</a>
                             <a class="dropdown-item @yield('menu-menejemen-pengguna')" href="{{route('user.index')}}">Manajemen
                                 Pengguna</a>
+                            <a class="dropdown-item @yield('menu-format-laporan')" href="#">Format Laporan</a>
                         </div>
                     </li>
                 @endcan

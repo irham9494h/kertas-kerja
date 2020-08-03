@@ -29,7 +29,7 @@ $(function () {
     });
 
     $.ajax({
-        type: 'GET', url: window.location.origin + '/api/user', success: function (data) {
+        type: 'GET', url: window.location.origin + '/user-info', success: function (data) {
             user = data;
         },
     });

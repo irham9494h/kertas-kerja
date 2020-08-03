@@ -10,7 +10,32 @@ class TanggalSumberDana extends Model
 
     protected $guarded = [];
 
-    public function tahun(){
+    /**
+     * Boot the Model.
+     */
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($model) {
+            foreach ($model->kertas_kerja as $pendapatan) {
+                $pendapatan->delete();
+            }
+
+            foreach ($model->kertas_kerja_belanja as $belanja) {
+                $belanja->delete();
+            }
+
+            foreach ($model->kertas_kerja_pembiayaan as $pembiayaan) {
+                $pembiayaan->delete();
+            }
+
+            return true;
+        });
+    }
+
+    public function tahun()
+    {
         return $this->belongsTo(TahunSumberDana::class);
     }
 

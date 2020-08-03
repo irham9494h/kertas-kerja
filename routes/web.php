@@ -17,6 +17,7 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/user-info', 'Auth\LoginController@getUserInfo');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
@@ -181,10 +182,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('kertas-kerja/{tanggal_id}/all', 'TanggalKertasKerjaController@fetchKertasKerja')->name('kertas-kerja.pendapatan.all');
 
     //LAPORAN
-    Route::get('report/kertas-kerja', 'Laporan\LaporanKertasKerjaController@index')->name('lap-kk');
-    Route::get('report/kertas-kerja/tgl/{tahun_id}', 'Laporan\LaporanKertasKerjaController@getTanggalByTahun');
-    Route::get('report/kertas-kerja/2020', 'Laporan\LaporanKertasKerjaController@laporan2020')->name('lap-kk-2020');
+    Route::group(['prefix' => 'report/kertas-kerja'], function () {
+        Route::get('/', 'Laporan\LaporanKertasKerjaController@index')->name('lap-kk');
+        Route::post('/view', 'Laporan\LaporanKertasKerjaController@laporanKertasKerja')->name('lap-kk.view');
+
+        Route::get('/tgl/{tahun_id}', 'Laporan\LaporanKertasKerjaController@getTanggalByTahun');
+        Route::get('/2020', 'Laporan\LaporanKertasKerjaController@laporan2020')->name('lap-kk-2020');
+
 //    Route::get('report/kertas-kerja/2020', 'Laporan\LaporanKertasKerjaController@laporan2020')->name('lap-kk-2020');
+    });
 
     Route::get('rek', 'KertasKerjaController@rek');
 

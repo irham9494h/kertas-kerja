@@ -63,7 +63,7 @@
                                         @endif
                                         <td>
                                             <div class="btn-group btn-group-xs">
-                                                <input type="hidden" value="{{$tahun->status_murni}}" id="statusMurni">
+                                                <input type="hidden" value="{{$tahun->status_murni}}" id="statusMurni{{$tahun->id}}">
 
                                                 <button class="btn btn-outline-primary btn-xs dropdown-toggle"
                                                         type="button"

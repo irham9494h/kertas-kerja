@@ -75,7 +75,7 @@ class TahunRekeningController extends AppController
         $tahun->status = 1;
         $tahun->save();
 
-        if ($tahun){
+        if ($tahun) {
             $deactivateOthers = TahunRekening::where('id', '!=', $id)->update(['status' => 0]);
             return $this->successResponse(null, 'Berhasil mengaktifkan tahun rekening');
         }

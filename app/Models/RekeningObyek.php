@@ -17,6 +17,6 @@ class RekeningObyek extends Model
 
     public function rincian_obyek()
     {
-        return $this->hasMany(RekeningRincianObyek::class);
+        return $this->hasMany(RekeningRincianObyek::class, 'obyek_id', 'id');
     }
 }

@@ -12,7 +12,7 @@ class RekeningRincianObyek extends Model
 
     public function obyek()
     {
-        return $this->belongsTo(RekeningObyek::class);
+        return $this->belongsTo(RekeningObyek::class, 'obyek_id');
     }
 
     public function kertas_kerja_pendapatan()

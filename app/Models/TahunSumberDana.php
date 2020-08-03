@@ -10,6 +10,35 @@ class TahunSumberDana extends Model
 
     protected $guarded = [];
 
+    /**
+     * Boot the Model.
+     */
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($model) {
+            foreach ($model->tanggal as $tanggal) {
+
+                foreach ($tanggal->kertas_kerja as $pendapatan) {
+                    $pendapatan->delete();
+                }
+
+                foreach ($tanggal->kertas_kerja_belanja as $belanja) {
+                    $belanja->delete();
+                }
+
+                foreach ($tanggal->kertas_kerja_pembiayaan as $pembiayaan) {
+                    $pembiayaan->delete();
+                }
+
+                $tanggal->delete();
+            }
+
+            return true;
+        });
+    }
+
     public static function pembahasanStrukturMurni(){
         return 0;
     }
