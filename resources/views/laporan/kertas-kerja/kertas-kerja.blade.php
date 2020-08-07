@@ -37,8 +37,9 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-12">
-                <form action="{{route('lap-kk.view')}}" method="POST">
+                <form action="{{route('lap-kk.view')}}" method="POST" id="filterForm">
                     @csrf
+                    <input type="hidden" name="report" id="report">
                     <div class="card collapsed-card">
 
                         <div class="card-header">
@@ -89,7 +90,12 @@
                         <!-- /.card-body -->
 
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-outline-primary btn-sm float-right">Tampilkan</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm float-right" id="btnView">
+                                Tampilkan
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="btnReport">
+                                <i class="fa fa-file-pdf"></i> Cetak
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -359,9 +365,6 @@
                             </table>
                         </div>
 
-                        <div class="card-footer">
-                            <a href="" class="btn btn-sm btn-outline-primary float-lg-right"><i class="fa fa-file-pdf"></i> Cetak</a>
-                        </div>
                     </div>
                 </div>
             @endif
@@ -415,5 +418,17 @@
 
             return [day, month, year].join('/');
         }
+
+        $('#btnView').on('click', function () {
+            $('#report').val(0);
+            $('#filterForm').submit();
+        })
+
+        $('#btnReport').on('click', function () {
+            $('#report').val(1);
+            $('#filterForm').submit();
+        })
+
+
     </script>
 @endsection
