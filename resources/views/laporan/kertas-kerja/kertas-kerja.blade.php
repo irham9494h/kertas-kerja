@@ -59,9 +59,16 @@
                                     <div class="form-group">
                                         <label>Tahun</label>
                                         <select class="form-control form-control-sm" id="selectTahun" name="tahun_id">
-                                            @foreach($tahuns as $tahun)
-                                                <option value="{{$tahun->id}}">{{$tahun->tahun}}</option>
-                                            @endforeach
+                                            @if(isset($pendapatan))
+                                                @foreach($tahuns as $tahun)
+                                                    <option
+                                                        value="{{$tahun->id}}" {{$request->tahun_id == $tahun->id ? 'selected' : ''}}>{{$tahun->tahun}}</option>
+                                                @endforeach
+                                            @else
+                                                @foreach($tahuns as $tahun)
+                                                    <option value="{{$tahun->id}}">{{$tahun->tahun}}</option>
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
                                 </div>
@@ -69,9 +76,20 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Tanggal</label>
-                                        <select class="form-control form-control-sm" id="selectTanggal"
-                                                name="tanggal_id">
-                                        </select>
+                                        @if(isset($pendapatan))
+                                            <select class="form-control form-control-sm" name="tanggal">
+                                                @foreach($tanggals as $tanggal)
+                                                    <option value="{{$tanggal->tanggal}}" {{$request->tanggal == $tanggal->tanggal ? 'selected' : ''}}
+                                                            data-tanggal="{{$tanggal->tanggal}}">
+                                                        {{\Carbon\Carbon::parse($tanggal->tanggal)->format('d/m/Y')}}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        @else
+                                            <select class="form-control form-control-sm" id="selectTanggal"
+                                                    name="tanggal">
+                                            </select>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -80,7 +98,7 @@
                                         <label>&nbsp;</label>
                                         <div class="form-check">
                                             <input type="checkbox" class="form-check-input" id="pergeseran"
-                                                   name="pergeseran" value="1">
+                                                   name="pergeseran">
                                             <label class="form-check-label" for="pergeseran">Pergeseran</label>
                                         </div>
                                     </div>
@@ -105,6 +123,10 @@
             @if(isset($pendapatan))
                 <div class="col-md-12">
                     <div class="card">
+
+                        <div class="card-header">
+                            <h3 class="card-title">Tanggal {{\Carbon\Carbon::parse($request->tanggal)->format('d/m/Y')}}</h3>
+                        </div>
 
                         <div class="card-body">
                             <table class="border-05">
@@ -142,45 +164,47 @@
                                 </tr>
 
                                 {{--Kertas kerja pendapatan--}}
-                                <tr id="">
-                                    <td class="border-right-05 table-row">
-                                        {{$pendapatan->kode_akun}}
-                                    </td>
-                                    <td class=" table-row"><strong>{{$pendapatan->nama_akun}}</strong></td>
-                                    <td class=" table-row" style="border: 1px solid black; text-align: right">
-                                        <strong>
-                                            {{number_format($pendapatan->nilai, 2, ',', '.')}}
-                                        </strong>
-                                    </td>
-                                </tr>
-                                @foreach($pendapatan->kelompok as $kelompok)
-                                    <tr>
+                                @if(!empty($pendapatan))
+                                    <tr id="">
                                         <td class="border-right-05 table-row">
-                                            {{$pendapatan->kode_akun}}.{{$kelompok['kode_kelompok']}}
+                                            {{$pendapatan->kode_akun}}
                                         </td>
-                                        <td class=" table-row" style="text-indent: 2em">
-                                            <strong> {{$kelompok['nama_kelompok']}}</strong>
-                                        </td>
+                                        <td class=" table-row"><strong>{{$pendapatan->nama_akun}}</strong></td>
                                         <td class=" table-row" style="border: 1px solid black; text-align: right">
-                                            <strong> {{number_format($kelompok['nilai'], 2, ',', '.')}}</strong>
+                                            <strong>
+                                                {{number_format($pendapatan->nilai, 2, ',', '.')}}
+                                            </strong>
                                         </td>
                                     </tr>
-                                    @foreach($kelompok['jenis'] as $jenis)
+                                    @foreach($pendapatan->kelompok as $kelompok)
                                         <tr>
                                             <td class="border-right-05 table-row">
                                                 {{$pendapatan->kode_akun}}.{{$kelompok['kode_kelompok']}}
-                                                .{{$jenis['kode_jenis']}}
                                             </td>
-                                            <td class=" table-row"
-                                                style="text-indent: 4em">{{$jenis['jenis']}}
+                                            <td class=" table-row" style="text-indent: 2em">
+                                                <strong> {{$kelompok['nama_kelompok']}}</strong>
                                             </td>
-                                            <td class=" table-row"
-                                                style="border-left: 1px solid black; text-align: right">
-                                                {{number_format($jenis['nilai'], 2, ',', '.')}}
+                                            <td class=" table-row" style="border: 1px solid black; text-align: right">
+                                                <strong> {{number_format($kelompok['nilai'], 2, ',', '.')}}</strong>
                                             </td>
                                         </tr>
+                                        @foreach($kelompok['jenis'] as $jenis)
+                                            <tr>
+                                                <td class="border-right-05 table-row">
+                                                    {{$pendapatan->kode_akun}}.{{$kelompok['kode_kelompok']}}
+                                                    .{{$jenis['kode_jenis']}}
+                                                </td>
+                                                <td class=" table-row"
+                                                    style="text-indent: 4em">{{$jenis['jenis']}}
+                                                </td>
+                                                <td class=" table-row"
+                                                    style="border-left: 1px solid black; text-align: right">
+                                                    {{number_format($jenis['nilai'], 2, ',', '.')}}
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     @endforeach
-                                @endforeach
+                                @endif
 
                                 <tr>
                                     <td class="border-right-05 table-row"></td>
@@ -189,46 +213,48 @@
                                 </tr>
 
                                 {{--kertas kerja belanja--}}
-                                <tr id="">
-                                    <td class="border-right-05 table-row">
-                                        {{$belanja->kode_akun}}
-                                    </td>
-                                    <td class=" table-row"><strong>{{$belanja->nama_akun}}</strong></td>
-                                    <td class=" table-row"
-                                        style="border: 1px solid black; text-align: right">
-                                        <strong>
-                                            {{number_format($belanja->nilai, 2, ',', '.')}}
-                                        </strong>
-                                    </td>
-                                </tr>
-                                @foreach($belanja->kelompok as $kelompok)
-                                    <tr>
+                                @if(!empty($belanja))
+                                    <tr id="">
                                         <td class="border-right-05 table-row">
-                                            {{$belanja->kode_akun}}.{{$kelompok['kode_kelompok']}}
+                                            {{$belanja->kode_akun}}
                                         </td>
-                                        <td class=" table-row" style="text-indent: 2em">
-                                            <strong> {{$kelompok['nama_kelompok']}}</strong>
-                                        </td>
-                                        <td class=" table-row" style="border: 1px solid black; text-align: right">
-                                            <strong> {{number_format($kelompok['nilai'], 2, ',', '.')}}</strong>
+                                        <td class=" table-row"><strong>{{$belanja->nama_akun}}</strong></td>
+                                        <td class=" table-row"
+                                            style="border: 1px solid black; text-align: right">
+                                            <strong>
+                                                {{number_format($belanja->nilai, 2, ',', '.')}}
+                                            </strong>
                                         </td>
                                     </tr>
-                                    @foreach($kelompok['jenis'] as $jenis)
+                                    @foreach($belanja->kelompok as $kelompok)
                                         <tr>
                                             <td class="border-right-05 table-row">
                                                 {{$belanja->kode_akun}}.{{$kelompok['kode_kelompok']}}
-                                                .{{$jenis['kode_jenis']}}
                                             </td>
-                                            <td class=" table-row"
-                                                style="text-indent: 4em">{{$jenis['jenis']}}
+                                            <td class=" table-row" style="text-indent: 2em">
+                                                <strong> {{$kelompok['nama_kelompok']}}</strong>
                                             </td>
-                                            <td class=" table-row"
-                                                style="border-left: 1px solid black; text-align: right">
-                                                {{number_format($jenis['nilai'], 2, ',', '.')}}
+                                            <td class=" table-row" style="border: 1px solid black; text-align: right">
+                                                <strong> {{number_format($kelompok['nilai'], 2, ',', '.')}}</strong>
                                             </td>
                                         </tr>
+                                        @foreach($kelompok['jenis'] as $jenis)
+                                            <tr>
+                                                <td class="border-right-05 table-row">
+                                                    {{$belanja->kode_akun}}.{{$kelompok['kode_kelompok']}}
+                                                    .{{$jenis['kode_jenis']}}
+                                                </td>
+                                                <td class=" table-row"
+                                                    style="text-indent: 4em">{{$jenis['jenis']}}
+                                                </td>
+                                                <td class=" table-row"
+                                                    style="border-left: 1px solid black; text-align: right">
+                                                    {{number_format($jenis['nilai'], 2, ',', '.')}}
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     @endforeach
-                                @endforeach
+                                @endif
 
                                 <tr>
                                     <td class="border-right-05 table-row"></td>
@@ -237,23 +263,25 @@
                                 </tr>
 
                                 {{--Surplus/defisit--}}
-                                <tr id="">
-                                    <td class="border-right-05 table-row">
+                                @if(!empty($pendapatan) || !empty($belanja))
+                                    <tr id="">
+                                        <td class="border-right-05 table-row">
 
-                                    </td>
-                                    <td class="table-row text-right"><strong>SURPLUS/(DEFISIT)</strong></td>
-                                    <td class=" table-row"
-                                        style="border: 1px solid black; text-align: right">
+                                        </td>
+                                        <td class="table-row text-right"><strong>SURPLUS/(DEFISIT)</strong></td>
+                                        <td class=" table-row"
+                                            style="border: 1px solid black; text-align: right">
 
-                                        @php
-                                            $defisit = $pendapatan->nilai - $belanja->nilai;
-                                        @endphp
+                                            @php
+                                                $defisit = $pendapatan->nilai - $belanja->nilai;
+                                            @endphp
 
-                                        <strong>
-                                            {{$defisit < 0 ? '('.number_format(abs($defisit), 2, ',', '.').')' : $defisit}}
-                                        </strong>
-                                    </td>
-                                </tr>
+                                            <strong>
+                                                {{$defisit < 0 ? '('.number_format(abs($defisit), 2, ',', '.').')' : $defisit}}
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                @endif
 
                                 <tr>
                                     <td class="border-right-05 table-row"></td>
@@ -262,53 +290,55 @@
                                 </tr>
 
                                 {{--kertas kerja pembiayaan--}}
-                                <tr id="">
-                                    <td class="border-right-05 table-row">
-                                        {{$pembiayaan->kode_akun}}
-                                    </td>
-                                    <td class=" table-row"><strong>{{$pembiayaan->nama_akun}}</strong></td>
-                                    <td class=" table-row"
-                                        style="border: 1px solid black; text-align: right">
-                                        {{--                                        <strong>--}}
-                                        {{--                                            {{number_format($pembiayaan->nilai, 2, ',', '.')}}--}}
-                                        {{--                                        </strong>--}}
-                                    </td>
-                                </tr>
-                                @foreach($pembiayaan->kelompok as $kelompok)
-
-                                    @if ($kelompok['kode_kelompok'] == 2)
-                                        @php
-                                            $nilaiPengeluaran = $kelompok['nilai'];
-                                        @endphp
-                                    @endif
-
-                                    <tr>
+                                @if(!empty($pembiayaan))
+                                    <tr id="">
                                         <td class="border-right-05 table-row">
-                                            {{$pembiayaan->kode_akun}}.{{$kelompok['kode_kelompok']}}
+                                            {{$pembiayaan->kode_akun}}
                                         </td>
-                                        <td class=" table-row" style="text-indent: 2em">
-                                            <strong> {{$kelompok['nama_kelompok']}}</strong>
-                                        </td>
-                                        <td class=" table-row" style="border: 1px solid black; text-align: right">
-                                            <strong> {{number_format($kelompok['nilai'], 2, ',', '.')}}</strong>
+                                        <td class=" table-row"><strong>{{$pembiayaan->nama_akun}}</strong></td>
+                                        <td class=" table-row"
+                                            style="border: 1px solid black; text-align: right">
+                                            {{--                                        <strong>--}}
+                                            {{--                                            {{number_format($pembiayaan->nilai, 2, ',', '.')}}--}}
+                                            {{--                                        </strong>--}}
                                         </td>
                                     </tr>
-                                    @foreach($kelompok['jenis'] as $jenis)
+                                    @foreach($pembiayaan->kelompok as $kelompok)
+
+                                        @if ($kelompok['kode_kelompok'] == 2)
+                                            @php
+                                                $nilaiPengeluaran = $kelompok['nilai'];
+                                            @endphp
+                                        @endif
+
                                         <tr>
                                             <td class="border-right-05 table-row">
                                                 {{$pembiayaan->kode_akun}}.{{$kelompok['kode_kelompok']}}
-                                                .{{$jenis['kode_jenis']}}
                                             </td>
-                                            <td class=" table-row"
-                                                style="text-indent: 4em">{{$jenis['jenis']}}
+                                            <td class=" table-row" style="text-indent: 2em">
+                                                <strong> {{$kelompok['nama_kelompok']}}</strong>
                                             </td>
-                                            <td class=" table-row"
-                                                style="border-left: 1px solid black; text-align: right">
-                                                {{number_format($jenis['nilai'], 2, ',', '.')}}
+                                            <td class=" table-row" style="border: 1px solid black; text-align: right">
+                                                <strong> {{number_format($kelompok['nilai'], 2, ',', '.')}}</strong>
                                             </td>
                                         </tr>
+                                        @foreach($kelompok['jenis'] as $jenis)
+                                            <tr>
+                                                <td class="border-right-05 table-row">
+                                                    {{$pembiayaan->kode_akun}}.{{$kelompok['kode_kelompok']}}
+                                                    .{{$jenis['kode_jenis']}}
+                                                </td>
+                                                <td class=" table-row"
+                                                    style="text-indent: 4em">{{$jenis['jenis']}}
+                                                </td>
+                                                <td class=" table-row"
+                                                    style="border-left: 1px solid black; text-align: right">
+                                                    {{number_format($jenis['nilai'], 2, ',', '.')}}
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     @endforeach
-                                @endforeach
+                                @endif
 
                                 <tr>
                                     <td class="border-right-05 table-row"></td>
@@ -317,23 +347,25 @@
                                 </tr>
 
                                 {{--Pembiayaan netto--}}
-                                <tr id="">
-                                    <td class="border-right-05 table-row">
+                                @if(!empty($pembiayaan))
+                                    <tr id="">
+                                        <td class="border-right-05 table-row">
 
-                                    </td>
-                                    <td class="table-row text-right"><strong>PEMBIAYAAN/NETTO</strong></td>
-                                    <td class=" table-row"
-                                        style="border: 1px solid black; text-align: right">
+                                        </td>
+                                        <td class="table-row text-right"><strong>PEMBIAYAAN/NETTO</strong></td>
+                                        <td class=" table-row"
+                                            style="border: 1px solid black; text-align: right">
 
-                                        @php
-                                            $pembiayaanNetto = $pembiayaan->nilai - ($nilaiPengeluaran * 2);
-                                        @endphp
+                                            @php
+                                                $pembiayaanNetto = $pembiayaan->nilai - ($nilaiPengeluaran * 2);
+                                            @endphp
 
-                                        <strong>
-                                            {{number_format($pembiayaanNetto, 2, ',', '.')}}
-                                        </strong>
-                                    </td>
-                                </tr>
+                                            <strong>
+                                                {{number_format($pembiayaanNetto, 2, ',', '.')}}
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                @endif
 
                                 <tr>
                                     <td class="border-right-05 table-row"></td>
@@ -342,24 +374,26 @@
                                 </tr>
 
                                 {{--Sisa lebih pembiayaan anggaran tahun berkenaan--}}
-                                <tr id="">
-                                    <td class="border-right-05 table-row">
+                                @if (!empty($pembiayaan))
+                                    <tr id="">
+                                        <td class="border-right-05 table-row">
 
-                                    </td>
-                                    <td class="table-row text-right"><strong>SISA LEBIH PEMBIAYAAN ANGGARAN TAHUN
-                                            BERKENAAN</strong></td>
-                                    <td class=" table-row"
-                                        style="border: 1px solid black; text-align: right">
+                                        </td>
+                                        <td class="table-row text-right"><strong>SISA LEBIH PEMBIAYAAN ANGGARAN TAHUN
+                                                BERKENAAN</strong></td>
+                                        <td class=" table-row"
+                                            style="border: 1px solid black; text-align: right">
 
-                                        @php
-                                            $sisaPembiayaan = $pembiayaanNetto - abs($defisit);
-                                        @endphp
+                                            @php
+                                                $sisaPembiayaan = $pembiayaanNetto - abs($defisit);
+                                            @endphp
 
-                                        <strong>
-                                            {{number_format($sisaPembiayaan, 2, ',', '.')}}
-                                        </strong>
-                                    </td>
-                                </tr>
+                                            <strong>
+                                                {{number_format($sisaPembiayaan, 2, ',', '.')}}
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                @endif
 
                                 </tbody>
                             </table>
@@ -391,10 +425,11 @@
                 success: function (response) {
                     var html = '';
                     var data = response;
+                    console.log(data)
                     if (data.length > 0) {
                         html = '';
                         for (i = 0; i < data.length; i++) {
-                            html += '<option value="' + data[i].id + '" data-tanggal="' + data[i].tanggal + '">' + formatDate(data[i].tanggal) + '</option>';
+                            html += '<option value="' + data[i].tanggal + '" data-tanggal="' + data[i].tanggal + '">' + formatDate(data[i].tanggal) + '</option>';
                         }
                         $('#selectTanggal').html(html)
                     } else {
